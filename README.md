@@ -3,9 +3,9 @@ Cyberobservability Project
 
 And yeah, the project name is gay af.
 
-# Data Format Samples
+## Data Format Samples
 
-## Netflow
+### Netflow
 ```json
 {
    "@timestamp":"2018-09-21T22:46:41.000Z",
@@ -32,7 +32,7 @@ And yeah, the project name is gay af.
 }
 ```
 
-## Security
+### Security
 ```json
 {
    "@timestamp":"2017-11-05T07:00:00.113Z",
@@ -53,7 +53,7 @@ And yeah, the project name is gay af.
 }
 ```
 
-## Sysmon
+### Sysmon
 ```json
 {
    "@timestamp":"2018-10-09T04:26:40.523Z",
