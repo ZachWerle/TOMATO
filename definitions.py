@@ -32,7 +32,7 @@ HOSTNAMES = HOST_TO_IP.keys()
 HOST_IPS = HOST_TO_IP.values()
 
 
-def generate_gsystem(hostnames: KeysView[str]) -> Graph:
+def generate_graphical_system(hostnames: KeysView[str]) -> Graph:
     """
     Generates a gsystem for the hostnames.
 
@@ -50,5 +50,5 @@ def generate_gsystem(hostnames: KeysView[str]) -> Graph:
     return adjacency_graph
 
 
-# store the generated gsystem as G_SYSTEM
-G_SYSTEM = generate_gsystem(HOSTNAMES)
+# store the generated graphical system
+GRAPHICAL_SYSTEM = generate_graphical_system(HOSTNAMES)
