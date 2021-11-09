@@ -1,8 +1,6 @@
 # TorNATO
 Cyberobservability Project
 
-And yeah, the project name is gay af.
-
 ## Data Format Samples
 
 ### Netflow
