@@ -1,6 +1,8 @@
 # TorNATO
 Cyberobservability Project
 
+Creating a new metric to expand on research done in https://ieeexplore.ieee.org/abstract/document/8788508.
+
 ## Data Format Samples
 
 ### Netflow
