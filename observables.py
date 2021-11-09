@@ -18,7 +18,7 @@ PROCESS_ATTACK_FEATURES = {
         {'exe': 'net.exe', 'params': ['view', '\\remotesystem']},
         {'exe': 'net.exe', 'params': ['share']}
     ],
-    'password_policy_discovery': [{exe: 'net.exe', params: ['accounts']}],
+    'password_policy_discovery': [{'exe': 'net.exe', 'params': ['accounts']}],
     'permission_groups_discovery': [
         {'exe': 'net.exe', 'params': ['group']},
         {'exe': 'net.exe', 'params': ['localgroup']}
@@ -143,13 +143,13 @@ NETFLOW_ATTACK_FEATURES = {
 }
 
 TACTICS = {
-    lateral_movement: set(
+    'lateral_movement': set(
         'application_deployment_software', 'dcom', 'logon_scripts', 'pass_the_hash',
         'pass_the_ticket', 'remote_desktop_protocol', 'remote_file_copy',
         'ssh_hijacking', 'shared_webroot', 'taint_shared_content',
         'third_party_software', 'windows_admin_shares', 'windows_remote_management'
     ),
-    discovery: set(
+    'discovery': set(
         'account_discovery', 'network_service_scanning', 'network_share_discovery',
         'password_policy_discovery', 'permission_groups_discovery',
         'process_discovery', 'query_registry', 'remote_system_discovery',
@@ -157,14 +157,14 @@ TACTICS = {
         'system_network_config_discovery', 'system_network_conn_discovery',
         'system_owner_discovery', 'system_service_discovery', 'system_time_discovery'
     ),
-    execution: set(
+    'execution': set(
         'cmstp', 'command_line_interface', 'control_panel_items',
         'dynamic_data_exchange', 'installutil', 'mshta', 'powershell', 'regsvc_regasm',
         'regsvr32', 'rundll32', 'scheduled_task', 'scripting', 'service_execution',
         'signed_binary_proxy_exec', 'trusted_deverloper_utilities', 'user_execution',
         'windows_mgmt_instrumentation'
     ),
-    privilege_escalation: set(
+    'privilege_escalation': set(
         'access_token_manipulation', 'accessibility_features', 'appcert_dlls',
         'appinit_dlls', 'application_shimming', 'bypass_uac',
         'image_file_execution_options_injection', 'port_monitors',

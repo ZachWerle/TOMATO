@@ -6,7 +6,7 @@ import copy
 from typing import List, Dict
 from random import sample
 from os.path import exists
-from observables import GRAPHICAL_SYSTEM
+from definitions import GRAPHICAL_SYSTEM
 
 
 def markov_analysis(state: str) -> List[str]:
