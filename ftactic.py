@@ -15,7 +15,7 @@ def markov_analysis(state: str) -> List[str]:
     return list(tactics)
 
 
-def random_walk(graph: networkx.Graph):
+def random_walk(graph: networkx.Graph) -> List[Dict[str, object]]:
     previous_state = 'discovery'
     current_state = 'discovery'
     discovery_count = 0
@@ -70,7 +70,7 @@ def random_walk(graph: networkx.Graph):
 
 
 def build_n_walks(graph: networkx.Graph, n: int) -> List[Dict[str, object]]:
-    return [random_walk(graph) for walk in range(n)]
+    return [random_walk(graph) for _ in range(n)]
 
 
 def build_matrix_from_walks(walks: List[Dict[str, object]], host_indices: Dict[str, int]):
