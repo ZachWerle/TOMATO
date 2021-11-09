@@ -10,9 +10,12 @@ def equal_or_empty(feature, event, element):
 def process_event_counts(events: List[object],
                          features: Dict[str, object],
                          tactics: Set[str]) -> Dict[str, int]:
-    counts = dict()
-    for event in events:
-        anomalous = False
-        found_tactics = dict(map(lambda x: (x, False), tactics))
-        for key, value in features:
-            pass
+    pass
+
+
+def generate_event_counter(key: str):
+    def local_closure(events: List[object],
+                      features: Dict[str, object],
+                      tactics: Set[str]) -> Dict[str, int]:
+        pass
+    pass
