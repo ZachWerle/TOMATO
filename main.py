@@ -324,7 +324,6 @@ print(banner)
 src_host_efficiency = [safe_divide(src_observ[index], c) for index, c in enumerate(src_log_counts)]
 dst_host_efficiency = [safe_divide(dst_observ[index], c) for index, c in enumerate(dst_log_counts)]
 
-print(e_obsrv)
 total_efficiency = safe_divide(reduce(lambda x, y: x + np.sum(y[1], axis=None, dtype=np.float32), e_obsrv.items(), 0),
                                total_log_count)
 
