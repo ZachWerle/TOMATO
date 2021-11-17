@@ -1,11 +1,17 @@
 import json
-import numpy.matlib
 import argparse
+from json import encoder
+from functools import reduce
 import numpy as np
 import os
+import pandas as pd
 
-from util import split_filepath, command_param_list
-from stats import process_event_counts, generate_event_counter
+from pandas import json_normalize
+from definitions import HOST_IPS, HOST_TO_IP, HOSTNAMES
+from ftactic import get_tactic_matrix
+from observables import NETFLOW_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, TACTICS, WINLOG_ATTACK_FEATURES
+from util import aggregate_matrix, safe_divide, split_filepath, command_param_list
+from stats import evaluate_machine, process_event_counts, generate_event_counter
 from typing import Dict, List
 
 np.set_printoptions(precision=2, suppress=True)
@@ -67,7 +73,6 @@ print(message_builder)
 print(message_banner)
 
 
-# kill me now, this is painful
 def print_evaluation(stats) -> None:
     if not OUTPUT_LOGDATA:
         return None
@@ -86,20 +91,23 @@ def print_evaluation(stats) -> None:
     print('Anomalous Freq: {0} logs / day'.format(stats['anomalous']))
 
 
-def print_matrix(matrix_table: Dict[str, np.matlib.matrix]) -> None:
-    for tactic, matrix in matrix_table.items():
-        print(f'{tactic}:')
-        print(matrix)
+def print_matrix(matrix_table: Dict[str, np.ndarray]) -> None:
+    if isinstance(matrix_table, dict):
+        for attack_tactic, attack_matrix in matrix_table.items():
+            print(f'{attack_tactic}:')
+            print(attack_matrix)
+    else:
+        print(matrix_table)
 
 
-def print_sparse_matrix(matrix_table: Dict[str, np.matlib.matrix]) -> None:
+def print_sparse_matrix(matrix_table: Dict[str, np.ndarray]) -> None:
     entries_per_line = 3
-    for tactic, matrix in matrix_table.items():
+    for _, attack_matrix in matrix_table.items():
         entries = 0
-        for row_index in range(matrix.shape[0]):
-            for col_index in range(matrix.shape[1]):
-                if matrix[row_index, col_index] != 0:
-                    print(f'(i: {row_index}, j: {col_index}, val: {matrix[row_index, col_index]}) ', end='')
+        for row_index in range(attack_matrix.shape[0]):
+            for col_index in range(attack_matrix.shape[1]):
+                if attack_matrix[row_index, col_index] != 0:
+                    print(f'(i: {row_index}, j: {col_index}, val: {attack_matrix[row_index, col_index]}) ', end='')
                     entries += 1
                     if entries == entries_per_line:
                         print()
@@ -125,13 +133,13 @@ print('Loading complete')
 
 sysmon_counter = process_event_counts
 winlog_counter = generate_event_counter('event_id')
-netflow_counter = generate_event_counter('dport')
+netflow_counter = generate_event_counter('destination_port')
 
 if OUTPUT_LOGDATA:
-    output = 'STATISTICS FOR SYSMON LOGS (HOST: COM600-PC):'
-    banner = '-' * len(output)
+    message = 'STATISTICS FOR SYSMON LOGS (HOST: COM600-PC)'
+    banner = '0' * len(message)
     print(banner)
-    print(output)
+    print(message)
     print(banner)
 
 
@@ -150,5 +158,176 @@ def reduce_event(meta_event) -> Dict[str, str]:
     return event_dict
 
 
+process_events = json_normalize(process_create_events)
+process_events = process_events[process_events.computer_name == 'COM600-PC']
+
 reduced_events = filter(lambda x: x['computer_name'] == 'COM600-PC', process_create_events)
 reduced_events = [reduce_event(event) for event in reduced_events]
+# temp = json_normalize(reduced_events)
+# print(temp)
+
+# pd.set_option('display.max_columns', None)
+# test_one = json_normalize(security_events)
+# print(test_one.columns)
+# test_two = json_normalize(process_create_events)
+# print(test_two.columns)
+# test_three = json_normalize(netflow_events)
+# print(test_three.columns)
+
+sdata = evaluate_machine(reduced_events, PROCESS_ATTACK_FEATURES, sysmon_counter)
+print_evaluation(sdata)
+
+if OUTPUT_LOGDATA:
+    message = 'STATISTICS FOR WINDOWS SECURITY LOGS (HOST: COM600-PC)'
+    banner = '0' * len(message)
+    print(banner)
+    print(message)
+    print(banner)
+
+com600 = list(filter(lambda event: event['computer_name'] == 'COM600-PC', security_events))
+cdata = evaluate_machine(com600, WINLOG_ATTACK_FEATURES, winlog_counter)
+print_evaluation(cdata)
+
+if OUTPUT_LOGDATA:
+    message = 'STATISTICS FOR WINDOWS SECURITY LOGS (HOST: HP-B53-01)'
+    banner = '0' * len(message)
+    print(banner)
+    print(message)
+    print(banner)
+
+hp_b53 = list(filter(lambda event: event['computer_name'] == 'HP-B53-01', security_events))
+hdata = evaluate_machine(hp_b53, WINLOG_ATTACK_FEATURES, winlog_counter)
+print_evaluation(hdata)
+
+netflow_pairs = dict()
+for event in netflow_events:
+    netflow = event['netflow']
+    src = netflow['ipv4_src_addr']
+    dst = netflow['ipv4_dst_addr']
+
+    if src in HOST_IPS and dst in HOST_IPS:
+        host_pair = (src, dst)
+        payload = {
+            'destination_port': netflow['l4_dst_port'],
+            '@timestamp': event['@timestamp']
+        }
+
+        netflow_pairs[host_pair] = netflow_pairs.get(host_pair, []) + [payload]
+
+host_indices = {}
+hostname_indices = {}
+host_index = len(HOSTNAMES)
+
+for index, elem in enumerate(HOSTNAMES):
+    hostname_indices[elem] = index
+
+for index, elem in enumerate(HOST_IPS):
+    host_indices[elem] = index
+
+src_log_counts = np.zeros(host_index)
+dst_log_counts = np.zeros(host_index)
+total_log_count = 0
+
+f_tactic_matrix = get_tactic_matrix('data/tactic_matrix.npy', hostname_indices)
+print(f_tactic_matrix)
+
+p_cpd = {}
+for tactic in TACTICS.keys():
+    matrix = np.reshape(np.zeros(host_index * host_index), (host_index, host_index))
+    i = host_indices[HOST_TO_IP['COM600-PC']]
+    com600_total = 0
+    com600_anomalous = 0
+    if USE_SYSMON:
+        com600_total += sdata['total_logs']
+        com600_anomalous += sdata['tactics'][tactic]['count']
+    if USE_WINLOG:
+        com600_total += cdata['total_logs']
+        com600_anomalous += cdata['tactics'][tactic]['count']
+
+    matrix[i, i] = safe_divide(com600_total - com600_anomalous, com600_total)
+    src_log_counts[i] += com600_total
+    dst_log_counts[i] += com600_total
+    total_log_count += com600_total
+
+    if USE_WINLOG:
+        j = host_indices[HOST_TO_IP['HP-B53-01']]
+        hp_b53_total = hdata['total_logs']
+        matrix[j, j] = 1 - hdata['tactics'][tactic]['frequency']
+        src_log_counts[j] += hp_b53_total
+        dst_log_counts[j] += hp_b53_total
+        total_log_count += hp_b53_total
+
+    p_cpd[tactic] = matrix
+
+for keys, logs in netflow_pairs.items():
+    src, dst = keys
+    if OUTPUT_LOGDATA:
+        message = f'NETFLOW STATISTICS FOR SRC: {src}, DST: {dst}'
+        banner = '0' * len(message)
+        print(banner)
+        print(message)
+        print(banner)
+
+        i = host_indices[src]
+        j = host_indices[dst]
+        ndata = evaluate_machine(logs, NETFLOW_ATTACK_FEATURES, netflow_counter)
+        if USE_NETFLOW:
+            tactic = 'lateral_movement'
+            p_cpd[tactic][i][j] = 1 - ndata['tactics'][tactic]['frequency']
+            src_log_counts[i] += ndata['total_logs']
+            dst_log_counts[i] += ndata['total_logs']
+            total_log_count += ndata['total_logs']
+        print_evaluation(ndata)
+
+e_obsrv = {}
+for index, (tactic, p_matrix) in enumerate(p_cpd.items()):
+    e_obsrv[tactic] = p_matrix * f_tactic_matrix[index, :, :]
+
+message = 'P_cpd Matrix'
+banner = '0' * len(message)
+print(banner)
+print(message)
+print(banner)
+print_sparse_matrix(p_cpd)
+
+message = 'F_tactic Matrix'
+banner = '0' * len(message)
+print(banner)
+print(message)
+print(banner)
+print_matrix(f_tactic_matrix)
+
+message = 'Host Indices'
+banner = '0' * len(message)
+print(banner)
+print(message)
+print(banner)
+for src, index in hostname_indices.items():
+    print(f'{src} -> {index}')
+
+message = 'Aggregated Host Scores'
+banner = '0' * len(message)
+print(banner)
+print(message)
+print(banner)
+src_observ, dst_observ = aggregate_matrix(e_obsrv)
+
+print(f'Destination Observability: {src_observ}')
+print(f'Source Observability: {dst_observ}')
+
+message = 'Aggregated Host Efficiency'
+banner = '0' * len(message)
+print(banner)
+print(message)
+print(banner)
+
+src_host_efficiency = [safe_divide(src_observ[index], c) for index, c in enumerate(src_log_counts)]
+dst_host_efficiency = [safe_divide(dst_observ[index], c) for index, c in enumerate(dst_log_counts)]
+
+print(e_obsrv)
+total_efficiency = safe_divide(reduce(lambda x, y: x + np.sum(y[1], axis=None, dtype=np.float32), e_obsrv.items(), 0),
+                               total_log_count)
+
+print(f'Destination Efficiency: {dst_host_efficiency}')
+print(f'Source Host Efficiency: {dst_host_efficiency}')
+print(f'Total Efficiency: {total_efficiency}')

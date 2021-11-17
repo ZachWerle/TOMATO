@@ -1,4 +1,3 @@
-import numpy.matlib
 import numpy as np
 import networkx
 import copy
@@ -10,9 +9,10 @@ from definitions import GRAPHICAL_SYSTEM
 
 
 def markov_analysis(state: str) -> List[str]:
-    tactics = set('discovery', 'privilege_escalation', 'lateral_movement', 'execution')
-    tactics -= set(state)
-    return list(tactics)
+    tactics = set(['discovery', 'privilege_escalation', 'lateral_movement', 'execution'])
+    tactics = tactics.difference(set([state]))
+    sample_t = sample(tactics, 1)[0]
+    return sample_t
 
 
 def random_walk(graph: networkx.Graph) -> List[Dict[str, object]]:
@@ -24,7 +24,7 @@ def random_walk(graph: networkx.Graph) -> List[Dict[str, object]]:
     update = False
     privileges = False
 
-    current = sample(graph.nodes, 1)
+    current = sample(graph.nodes, 1)[0]
     available = []
     attack_path = [current]
 
@@ -36,15 +36,15 @@ def random_walk(graph: networkx.Graph) -> List[Dict[str, object]]:
             update = not privileges
             privileges = True
         elif current_state == 'lateral_movement':
-            available = set(available + graph.neighbors(current))
+            available = set(available + [node for node in graph.neighbors(current)])
             available -= set(attack_path)
             available = list(available)
 
             if not available:
                 update = False
             else:
-                current = sample(available, 1)
-                attack_path += current
+                current = sample(available, 1)[0]
+                attack_path.append(current)
                 discovery_count = 0
                 privileges = False
                 update = True
@@ -58,11 +58,13 @@ def random_walk(graph: networkx.Graph) -> List[Dict[str, object]]:
                 'attack_path': copy.deepcopy(attack_path)
             }
 
-            walk += step
+            walk.append(step)
 
-            if current_state != 'execution':
-                previous_state = current_state
-                current_state = markov_analysis(current_state)
+            if current_state == 'execution':
+                break
+
+            previous_state = current_state
+            current_state = markov_analysis(current_state)
         else:
             current_state = markov_analysis(previous_state)
 
@@ -77,14 +79,13 @@ def build_matrix_from_walks(walks: List[Dict[str, object]], host_indices: Dict[s
     tactics = ['discovery', 'privilege_escalation', 'lateral_movement', 'execution']
     m = {}
     for tactic in tactics:
-        m[tactic] = np.matlib.zeros((len(host_indices), len(host_indices)))
-
+        m[tactic] = np.reshape(np.zeros(len(host_indices) * len(host_indices)), (len(host_indices), len(host_indices)))
+    
     for walk in walks:
         for index, step in enumerate(walk):
             host = step['host']
             tactic = step['tactic']
             host_i = host_indices[host]
-
             if tactic == 'discovery' or tactic == 'privilege_escalation' or tactic == 'execution':
                 m[tactic][host_i, host_i] += 1.0
             elif tactic == 'lateral_movement':
@@ -93,17 +94,17 @@ def build_matrix_from_walks(walks: List[Dict[str, object]], host_indices: Dict[s
                 source_i = host_indices[previous['host']]
                 m[tactic][source_i, host_i] += 1.0
                 m[tactic][source_i, source_i] += 1.0
-
+    
     return m
 
 
 def get_tactic_matrix(filename: str, hostname_indices: Dict[str, int]):
     if exists(filename):
         with open(filename, 'rb') as input_file:
-            return np.load(input_file)
+            return np.load(input_file, allow_pickle=True)
     else:
         walks = build_n_walks(GRAPHICAL_SYSTEM, 1000)
         ftactic = build_matrix_from_walks(walks, hostname_indices)
-        with open(filename, 'wb') as output_file:
+        with open(filename, 'wb+') as output_file:
             np.save(output_file, ftactic)
         return ftactic
