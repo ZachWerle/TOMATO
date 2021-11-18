@@ -1,3 +1,9 @@
+"""
+Author: Nathan Waltz
+
+Entropy utilities for computing the new TOMATO metric.
+"""
+
 import networkx
 import numpy as np
 
@@ -31,7 +37,7 @@ def create_lateral_movement_matrix(graph: Graph) -> np.matrix:
     movement probability matrix.
 
     p_{ij} = {1 / k_i if Aij = 1 else 0}
-    (A is the adjacency matirx, and k is the degree of a node)
+    (A is the adjacency matrix, and k is the degree of a node)
     """
     node_degrees = compute_node_degrees(graph)
     adjacency_matrix = get_adjacency_matrix(graph)
@@ -72,5 +78,5 @@ def create_probability_matrix(graph: Graph) -> np.matrix:
     privilege_escalation_matrix = create_on_host_tactic_matrix(graph) * (1 / NUM_FEATURES)
     return np.array([lateral_movement_matrix, discovery_matrix, execution_matrix, privilege_escalation_matrix])
 
-
-print(create_probability_matrix(GRAPHICAL_SYSTEM))
+np.set_printoptions(precision=3, suppress=True)
+probability_matrix = create_probability_matrix(GRAPHICAL_SYSTEM)
