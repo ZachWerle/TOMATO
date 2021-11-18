@@ -4,11 +4,11 @@ import numpy as np
 from typing import Dict
 from networkx import Graph
 
-from definitions import GRAPHICAL_SYSTEM, HOST_IPS
+from definitions import GRAPHICAL_SYSTEM, HOSTNAMES
 from observables import TACTICS
 
 # important for this dataset
-node_at_index = {index:value for index, value in enumerate(HOST_IPS)}
+node_at_index = {index:value for index, value in enumerate(HOSTNAMES)}
 
 NUM_FEATURES = len(TACTICS.keys())
 
@@ -40,8 +40,10 @@ def create_lateral_movement_matrix(graph: Graph) -> np.matrix:
         current_node = node_at_index[i]
         for j in range(adjacency_matrix.shape[1]):
             if adjacency_matrix[i, j] > 1 or adjacency_matrix[i, j] < 0:
-                raise ValueError('You passed an invalid adjacency matrix, please make sure it only contains 0s and 1s')
-            probability_matrix[i, j] = adjacency_matrix[i, j] / node_degrees[current_node]
+                raise ValueError('You passed an invalid adjacency matrix,  \
+                                  please make sure it only contains 0s and 1s')
+            probability_matrix[i, j] = \
+                adjacency_matrix[i, j] / node_degrees[current_node]
    
     return probability_matrix
 
@@ -64,7 +66,7 @@ def create_probability_matrix(graph: Graph) -> np.matrix:
     """
     # each of these is being treated as having an equal likelihood of occuring
     lateral_movement_matrix = create_lateral_movement_matrix(graph) * (1 / NUM_FEATURES)
-    
+
     discovery_matrix = create_on_host_tactic_matrix(graph)
     execution_matrix = create_on_host_tactic_matrix(graph)
     privilege_escalation_matrix = create_on_host_tactic_matrix(graph)
