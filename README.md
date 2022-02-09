@@ -1,9 +1,9 @@
-# TorNATO
+# TOMATO
 Cyberobservability Project
 
 Creating a new metric to expand on research done in https://ieeexplore.ieee.org/abstract/document/8788508.
 
-Python Version: 3.8.10
+Python Version: 3.8.10-yo-mama
 
 ## Data Format Samples
 
