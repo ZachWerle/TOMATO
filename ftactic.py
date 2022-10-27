@@ -101,7 +101,9 @@ def build_matrix_from_walks(walks: List[Dict[str, object]], host_indices: Dict[s
 def get_tactic_matrix(filename: str, hostname_indices: Dict[str, int]):
     if exists(filename):
         with open(filename, 'rb') as input_file:
-            return np.load(input_file, allow_pickle=True)
+            temp = np.load(input_file, allow_pickle=True)
+            ftactic = temp.tolist()
+            return ftactic
     else:
         walks = build_n_walks(GRAPHICAL_SYSTEM, 1000)
         ftactic = build_matrix_from_walks(walks, hostname_indices)

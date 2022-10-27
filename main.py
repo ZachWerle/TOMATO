@@ -281,7 +281,7 @@ for keys, logs in netflow_pairs.items():
 
 e_obsrv = {}
 for index, (tactic, p_matrix) in enumerate(p_cpd.items()):
-    e_obsrv[tactic] = p_matrix * f_tactic_matrix[index, :, :]
+    e_obsrv[tactic] = p_matrix * f_tactic_matrix[tactic]
 
 message = 'P_cpd Matrix'
 banner = '0' * len(message)
@@ -296,6 +296,13 @@ print(banner)
 print(message)
 print(banner)
 print_matrix(f_tactic_matrix)
+
+message = 'E_obsrv Matrix'
+banner = '0' * len(message)
+print(banner)
+print(message)
+print(banner)
+print_sparse_matrix(e_obsrv)
 
 message = 'Host Indices'
 banner = '0' * len(message)
