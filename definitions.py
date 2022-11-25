@@ -8,23 +8,18 @@ from networkx import Graph
 
 SECURITY_LOG = 'Microsoft-Windows-Security-Auditing'
 
-# COM600-PC is the Gateway (GW)
-COM600_PC_IP = '192.168.2.10'
+# This is where you input the file path to the data file you want to load into TOMATO
+DATA_FILE = "data/ossec-alerts-15.json"
 
-# HP-B53-01 is the Human Machine Interface (HMI)
-HP_B53_01_IP = '192.168.0.11'
+# This is where you input the key/name of the server that hosts your SIEM and associated event dataset
+SERVER = "zachary-VirtualBox"
 
 HOST_TO_IP = {
-    'COM600-PC': '192.168.2.10',
-    'HP-B53-01': '192.168.0.11',
-    'Relay1': '192.168.2.101',
-    'Relay2': '192.168.2.102',
-    'Relay3': '192.168.2.103',
-    'Relay4': '192.168.2.104',
-    'Relay5': '192.168.2.104',
-    'Relay6': '192.168.2.105',
-    'Relay7': '192.168.2.106',
-    'Relay8': '192.168.2.107'
+    'zachary-VirtualBox': '192.168.1.18',
+    'DESKTOP-9LO9B7Q': '192.168.1.115',
+    'DESKTOP-D403BQC': '192.168.1.112',
+    'DESKTOP-0H8GJPO': '192.168.1.13',
+    'DESKTOP-CKP652S': '192.168.1.27'
 }
 
 # the host names and host IPs
@@ -41,11 +36,16 @@ def generate_graphical_system(hostnames: KeysView[str]) -> Graph:
     """
     adjacency_graph = Graph()
     adjacency_graph.add_nodes_from(hostnames)
-    sorted_hostnames = sorted(list(hostnames))
-    for u, v in product(sorted_hostnames[:2], sorted_hostnames[2:]):
-        adjacency_graph.add_edge(u, v)
 
-    adjacency_graph.add_edge(sorted_hostnames[0], sorted_hostnames[1])
+    # Attach edges between the hosts and the server
+    for host in hostnames:
+        if host != SERVER:
+            adjacency_graph.add_edge(host, SERVER)
+
+    # Manually attach edges for individual services
+    adjacency_graph.add_edge("DESKTOP-D403BQC", "DESKTOP-CKP652S")
+    adjacency_graph.add_edge("DESKTOP-0H8GJPO", "DESKTOP-9LO9B7Q")
+    adjacency_graph.add_edge("DESKTOP-CKP652S", "DESKTOP-0H8GJPO")
 
     return adjacency_graph
 
