@@ -19,3 +19,13 @@ def aggregate_matrix(matrix):
     dst_observ = np.sum(matrix['execution'], axis=1)
 
     return src_observ, dst_observ
+
+def formalize_file(file_path):
+    infile = open(file_path, "r")
+    outfile = open("data/data.txt", "w")
+    for line in infile.readlines():
+        new_line = line.replace(":true", ":True")
+        new_line = new_line.replace(":false", ":False")
+        outfile.write(new_line)
+    infile.close()
+    outfile.close()

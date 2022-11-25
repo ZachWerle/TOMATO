@@ -10,7 +10,7 @@ from pandas import json_normalize
 from definitions import HOST_IPS, HOST_TO_IP, HOSTNAMES
 from ftactic import get_tactic_matrix
 from observables import NETFLOW_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, TACTICS, WINLOG_ATTACK_FEATURES
-from util import aggregate_matrix, safe_divide, split_filepath, command_param_list
+from util import aggregate_matrix, safe_divide, split_filepath, command_param_list, formalize_file
 from stats import evaluate_machine, process_event_counts, generate_event_counter
 from typing import Dict, List
 
@@ -117,15 +117,17 @@ def print_sparse_matrix(matrix_table: Dict[str, np.ndarray]) -> None:
 
 print("Loading dump files...")
 
-with open(os.path.join('data', 'sysmon-10k.txt')) as sysmon:
+formalize_file("data/ossec-alerts-15.json")
+
+with open("data/data.txt") as sysmon:
     lines = map(lambda line: eval(line.strip()), sysmon.readlines())
     process_create_events = list(map(lambda line: json.loads(json.dumps(line)), lines))
 
-with open(os.path.join('data', 'security-10k.txt')) as security:
+with open("data/data.txt") as security:
     lines = map(lambda line: eval(line.strip()), security.readlines())
     security_events = list(map(lambda line: json.loads(json.dumps(line)), lines))
 
-with open(os.path.join('data', 'netflow-v9-10k-relay.txt')) as netflow:
+with open("data/data.txt") as netflow:
     lines = map(lambda line: eval(line.strip()), netflow.readlines())
     netflow_events = list(map(lambda line: json.loads(json.dumps(line)), lines))
 

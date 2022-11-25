@@ -11,7 +11,7 @@ from definitions import GRAPHICAL_SYSTEM
 def markov_analysis(state: str) -> List[str]:
     tactics = set(['discovery', 'privilege_escalation', 'lateral_movement', 'execution'])
     tactics = tactics.difference(set([state]))
-    sample_t = sample(sorted(tactics), 1)[0]
+    sample_t = sample(list(tactics), 1)[0]
     return sample_t
 
 
@@ -24,7 +24,7 @@ def random_walk(graph: networkx.Graph) -> List[Dict[str, object]]:
     update = False
     privileges = False
 
-    current = sample(sorted(graph.nodes), 1)[0]
+    current = sample(list(graph), 1)[0]
     available = []
     attack_path = [current]
 
