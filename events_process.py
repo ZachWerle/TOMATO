@@ -2,7 +2,7 @@
 This file is for functions related to processing the different kinds of events in data.txt
 """
 from observables import NETFLOW_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, WINLOG_ATTACK_FEATURES
-from definitions import HOST_IPS
+from definitions import HOST_IPS, WAZUH
 from util import split_filepath, command_param_list
 from stats import evaluate_machine
 from typing import Dict
@@ -25,33 +25,59 @@ def print_evaluation(stats) -> None:
 
 
 def reduce_event(meta_event) -> Dict[str, str]:
-    event = meta_event['event_data']
-    path, file = split_filepath(event['Image'])
-    ppath, pfile = split_filepath(event['ParentImage'])
-    event_dict = {
-        'exe': file,
-        'parent_exe': pfile,
-        'path': path,
-        'parent_path': ppath,
-        'params': command_param_list(event["CommandLine"]),
-        '@timestamp': meta_event['@timestamp']
-    }
+    if WAZUH:
+        event = meta_event['data']['win']['eventdata']
+        path, file = split_filepath(event['image'])
+        ppath, pfile = "N/A", "N/A"
+        event_dict = {
+            'exe': file,
+            'parent_exe': pfile,
+            'path': path,
+            'parent_path': ppath,
+            'params': command_param_list(event["commandLine"]),
+            'timestamp': meta_event['timestamp']
+        }
+    else:
+        event = meta_event['event_data']
+        path, file = split_filepath(event['Image'])
+        ppath, pfile = split_filepath(event['ParentImage'])
+        event_dict = {
+            'exe': file,
+            'parent_exe': pfile,
+            'path': path,
+            'parent_path': ppath,
+            'params': command_param_list(event["CommandLine"]),
+            '@timestamp': meta_event['@timestamp']
+        }
     return event_dict
 
 
 def generate_netflow_pairs(netflow_events) -> Dict:
     netflow_pairs = dict()
-    for event in netflow_events:
-        netflow = event['netflow']
-        src = netflow['ipv4_src_addr']
-        dst = netflow['ipv4_dst_addr']
-        if src in HOST_IPS and dst in HOST_IPS:
-            host_pair = (src, dst)
-            payload = {
-                'destination_port': netflow['l4_dst_port'],
-                '@timestamp': event['@timestamp']
-            }
-            netflow_pairs[host_pair] = payload
+    if WAZUH:
+        for event in netflow_events:
+            netflow = event['data']
+            src = netflow['src_ip']
+            dst = netflow['dest_ip']
+            if src in HOST_IPS and dst in HOST_IPS:
+                host_pair = (src, dst)
+                payload = {
+                    'dest_port': netflow['dest_port'],
+                    'timestamp': event['timestamp']
+                }
+                netflow_pairs[host_pair] = payload
+    else:
+        for event in netflow_events:
+            netflow = event['netflow']
+            src = netflow['ipv4_src_addr']
+            dst = netflow['ipv4_dst_addr']
+            if src in HOST_IPS and dst in HOST_IPS:
+                host_pair = (src, dst)
+                payload = {
+                    'destination_port': netflow['l4_dst_port'],
+                    '@timestamp': event['@timestamp']
+                }
+                netflow_pairs[host_pair] = payload
     return netflow_pairs
 
 
@@ -61,7 +87,10 @@ def process_sysmon(hostname, process_create_events, sysmon_counter) -> Dict:
     print(banner)
     print(message)
     print(banner)
-    reduced_events = filter(lambda x: x['computer_name'] == hostname, process_create_events)
+    if WAZUH:
+        reduced_events = filter(lambda x: x['agent']['name'] == hostname, process_create_events)
+    else:
+        reduced_events = filter(lambda x: x['computer_name'] == hostname, process_create_events)
     reduced_events = [reduce_event(event) for event in reduced_events]
     sdata = evaluate_machine(reduced_events, PROCESS_ATTACK_FEATURES, sysmon_counter)
     print_evaluation(sdata)
@@ -74,13 +103,17 @@ def process_winlogs(hostname, security_events, winlog_counter) -> Dict:
     print(banner)
     print(message)
     print(banner)
-    com600 = list(filter(lambda event: event['computer_name'] == hostname, security_events))
-    cdata = evaluate_machine(com600, WINLOG_ATTACK_FEATURES, winlog_counter)
+    if WAZUH:
+        reduced_events = filter(lambda x: x['agent']['name'] == hostname, security_events)
+    else:
+        reduced_events = filter(lambda x: x['computer_name'] == hostname, security_events)
+    reduced_events = list(reduced_events)
+    cdata = evaluate_machine(reduced_events, WINLOG_ATTACK_FEATURES, winlog_counter)
     print_evaluation(cdata)
     return cdata
 
 
-def process_netflow(src, dst, logs, netflow_counter):
+def process_netflow(src, dst, logs, netflow_counter) -> Dict:
     message = f'NETFLOW STATISTICS FOR SRC: {src}, DST: {dst}'
     banner = '0' * len(message)
     print(banner)
@@ -88,3 +121,4 @@ def process_netflow(src, dst, logs, netflow_counter):
     print(banner)
     ndata = evaluate_machine(logs, NETFLOW_ATTACK_FEATURES, netflow_counter)
     print_evaluation(ndata)
+    return ndata

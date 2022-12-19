@@ -10,6 +10,8 @@ SECURITY_LOG = 'Microsoft-Windows-Security-Auditing'
 
 # This is where you input the file path to the data file you want to load into TOMATO
 DATA_FILE = "data/ossec-alerts-15.json"
+# This is where you check if the file is a Wazuh alert file
+WAZUH = 1
 
 # This is where you input the key/name of the server that hosts your SIEM and associated event dataset
 SERVER = "zachary-VirtualBox"

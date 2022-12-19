@@ -70,20 +70,23 @@ formalize_file(DATA_FILE)
 with open("data/data.txt") as sysmon:
     lines = map(lambda line: eval(line.strip()), sysmon.readlines())
     process_create_events = list(map(lambda line: json.loads(json.dumps(line)), lines))
+    process_create_events = list(filter(lambda x: 'sysmon' in x['rule']['groups'], process_create_events))
 
 with open("data/data.txt") as security:
     lines = map(lambda line: eval(line.strip()), security.readlines())
     security_events = list(map(lambda line: json.loads(json.dumps(line)), lines))
+    security_events = list(filter(lambda x: 'windows_security' in x['rule']['groups'], security_events))
 
 with open("data/data.txt") as netflow:
     lines = map(lambda line: eval(line.strip()), netflow.readlines())
     netflow_events = list(map(lambda line: json.loads(json.dumps(line)), lines))
+    netflow_events = list(filter(lambda x: 'suricata' in x['rule']['groups'], netflow_events))
 
 print('Loading complete')
 
 sysmon_counter = process_event_counts
-winlog_counter = generate_event_counter('event_id')
-netflow_counter = generate_event_counter('destination_port')
+winlog_counter = generate_event_counter('eventID')
+netflow_counter = generate_event_counter('dest_port')
 
 # Sysmon
 sdata = dict()
@@ -112,42 +115,46 @@ dst_log_counts = np.zeros(host_index)
 total_log_count = 0
 
 # Netflow
+ndata = dict()
+netflow_pairs = generate_netflow_pairs(netflow_events)
 if USE_NETFLOW:
-    netflow_pairs = generate_netflow_pairs(netflow_events)
     for keys, logs in netflow_pairs.items():
         src, dst = keys
-        process_netflow(src, dst, logs, netflow_counter)
+        ndata[src, dst] = process_netflow(src, dst, logs, netflow_counter)
 
 f_tactic_matrix = get_tactic_matrix('data/tactic_matrix.npy', hostname_indices)
-print(f_tactic_matrix)
 
 p_cpd = {}
 for tactic in TACTICS.keys():
     matrix = np.reshape(np.zeros(host_index * host_index), (host_index, host_index))
-    i = host_indices[HOST_TO_IP['COM600-PC']]
-    com600_total = 0
-    com600_anomalous = 0
-    if USE_SYSMON:
-        com600_total += sdata['total_logs']
-        com600_anomalous += sdata['tactics'][tactic]['count']
-    if USE_WINLOG:
-        com600_total += cdata['total_logs']
-        com600_anomalous += cdata['tactics'][tactic]['count']
+    for hostname in HOSTNAMES:
+        i = host_indices[HOST_TO_IP[hostname]]
+        total = 0
+        anomalous = 0
+        if USE_SYSMON:
+            total += sdata[hostname]['total_logs']
+            anomalous += sdata[hostname]['tactics'][tactic]['count']
+        if USE_WINLOG:
+            total += cdata[hostname]['total_logs']
+            anomalous += cdata[hostname]['tactics'][tactic]['count']
 
-    matrix[i, i] = safe_divide(com600_total - com600_anomalous, com600_total)
-    src_log_counts[i] += com600_total
-    dst_log_counts[i] += com600_total
-    total_log_count += com600_total
-
-    if USE_WINLOG:
-        j = host_indices[HOST_TO_IP['HP-B53-01']]
-        hp_b53_total = hdata['total_logs']
-        matrix[j, j] = 1 - hdata['tactics'][tactic]['frequency']
-        src_log_counts[j] += hp_b53_total
-        dst_log_counts[j] += hp_b53_total
-        total_log_count += hp_b53_total
+        matrix[i, i] = safe_divide(total - anomalous, total)
+        src_log_counts[i] += total
+        dst_log_counts[i] += total
+        total_log_count += total
 
     p_cpd[tactic] = matrix
+
+if USE_NETFLOW:
+    for keys, logs in netflow_pairs.items():
+        src, dst = keys
+        i = host_indices[src]
+        j = host_indices[dst]
+        tactic = 'lateral_movement'
+        p_cpd[tactic][i][j] = 1 - ndata[src, dst]['tactics'][tactic]['frequency']
+        src_log_counts[i] += ndata[src, dst]['total_logs']
+        dst_log_counts[j] += ndata[src, dst]['total_logs']
+        total_log_count += ndata[src, dst]['total_logs']
 
 e_obsrv = {}
 for index, (tactic, p_matrix) in enumerate(p_cpd.items()):

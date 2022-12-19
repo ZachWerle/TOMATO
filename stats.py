@@ -2,6 +2,7 @@ import observables
 import datetime
 
 from typing import List, Dict, Set
+from definitions import WAZUH
 
 from util import safe_divide
 
@@ -14,6 +15,9 @@ def process_event_counts(events: List[object],
                          features: Dict[str, object],
                          tactics: Dict[str, object]) -> Dict[str, int]:
     counts = dict()
+    if len(events) == 0:
+        counts['num_anomalous'] = counts.get('num_anomalous', 0)
+        return counts
     for event in events:
         anomalous = False
         found_tactics = dict(map(lambda x: (x, False), tactics))
@@ -60,8 +64,18 @@ def generate_event_counter(event_key: str):
                       features: Dict[str, object],
                       tactics: Dict[str, object]) -> Dict[str, int]:
         counts = dict()
+        if len(events) == 0:
+            counts['num_anomalous'] = counts.get('num_anomalous', 0)
+            return counts
         for event in events:
-            id = event[event_key]
+            if WAZUH:
+                if 'win' in event['data']:
+                    id = event['data']['win']['system'][event_key]
+                else:
+                    id = event['data'][event_key]
+            else:
+                id = event[event_key]
+            id = int(id)
             anomalous = False
             found_tactics = dict(map(lambda x: (x, False), tactics))
             for key, value in features.items():
@@ -75,7 +89,6 @@ def generate_event_counter(event_key: str):
             counts['num_anomalous'] = counts.get('num_anomalous', 0) + (1 if anomalous else 0)
 
         return counts
-
     return local_closure
 
 
@@ -103,12 +116,20 @@ def evaluate_machine(events, features, count_function):
     timestamps = []
     timestamp_string = '%Y-%m-%dT%H:%M:%S.%fZ'
     for event in events:
-        timestamps.append(datetime.datetime.strptime(event['@timestamp'], timestamp_string))
+        if WAZUH:
+            timestamps.append(datetime.datetime.strptime(event['timestamp'], '%Y-%m-%dT%H:%M:%S.%f-0700'))
+        else:
+            timestamps.append(datetime.datetime.strptime(event['@timestamp'], timestamp_string))
 
     timestamps.sort()
-    start = timestamps[0]
-    finish = timestamps[-1]
-    days = (finish - start).total_seconds() / 86400
+    if len(events) == 0:
+        start = 'N/A'
+        finish = 'N/A'
+        days = 0
+    else:
+        start = timestamps[0]
+        finish = timestamps[-1]
+        days = (finish - start).total_seconds() / 86400
 
     results['start_time'] = start
     results['finish_time'] = finish
