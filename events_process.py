@@ -60,9 +60,9 @@ def reduce_event(meta_event) -> Dict[str, str]:
     return event_dict
 
 
-def generate_network_pairs(network_events) -> Dict:
+def generate_network_pairs(network_events, use_suricata) -> Dict:
     network_pairs = dict()
-    if WAZUH:
+    if use_suricata:
         for event in network_events:
             if 'data' in event:
                 suricata = event['data']

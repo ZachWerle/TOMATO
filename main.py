@@ -65,7 +65,7 @@ print(message_banner)
 print(message_builder)
 print(message_banner)
 
-print("Loading dump files...")
+print("Loading {} file...".format(DATA_FILE))
 
 formalize_file(DATA_FILE)
 
@@ -114,7 +114,7 @@ total_log_count = 0
 
 # Suricata
 ndata = dict()
-suricata_pairs = generate_network_pairs(suricata_events)
+suricata_pairs = generate_network_pairs(suricata_events, USE_SURICATA)
 if USE_SURICATA:
     for keys, logs in suricata_pairs.items():
         src, dst = keys
