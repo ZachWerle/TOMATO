@@ -136,54 +136,113 @@ Python Version: 3.11.1
 ### Sysmon
 ```json
 {
-   "@timestamp":"2018-10-09T04:26:40.523Z",
-   "beat":{
-      "hostname":"COM600-PC",
-      "name":"COM600-PC",
-      "version":"5.4.0"
-   },
-   "computer_name":"COM600-PC",
-   "event_data":{
-      "CommandLine":"C:\\Windows\\system32\\wbem\\wmiprvse.exe -secured -Embedding",
-      "Company":"?",
-      "CurrentDirectory":"C:\\Windows\\system32\\",
-      "Description":"?",
-      "FileVersion":"?",
-      "Hashes":"SHA256=CBE2392792D209E15E44AC29E906FFDD5FBF6EED8BAB0D97D66E109AB2C5C56E",
-      "Image":"C:\\Windows\\System32\\wbem\\WmiPrvSE.exe",
-      "IntegrityLevel":"System",
-      "LogonGuid":"{A2FC6897-EA0A-5B98-0000-0020E4030000}",
-      "LogonId":"0x3e4",
-      "ParentCommandLine":"C:\\Windows\\system32\\svchost.exe -k DcomLaunch",
-      "ParentImage":"C:\\Windows\\System32\\svchost.exe",
-      "ParentProcessGuid":"{A2FC6897-EA0A-5B98-0000-00100ACA0000}",
-      "ParentProcessId":"612",
-      "ProcessGuid":"{A2FC6897-2E00-5BBC-0000-00106DF3F78F}",
-      "ProcessId":"5848",
-      "Product":"?",
-      "TerminalSessionId":"0",
-      "User":"NT AUTHORITY\\NETWORK SERVICE",
-      "UtcTime":"2018-10-09 04:26:40.522"
-   },
-   "event_id":1,
-   "level":"Information",
-   "log_name":"Microsoft-Windows-Sysmon/Operational",
-   "message":"Process Create:\nRuleName: \nUtcTime: 2018-10-09 04:26:40.522\nProcessGuid: {A2FC6897-2E00-5BBC-0000-00106DF3F78F}\nProcessId: 5848\nImage: C:\\Windows\\System32\\wbem\\WmiPrvSE.exe\nFileVersion: ?\nDescription: ?\nProduct: ?\nCompany: ?\nCommandLine: C:\\Windows\\system32\\wbem\\wmiprvse.exe -secured -Embedding\nCurrentDirectory: C:\\Windows\\system32\\\nUser: NT AUTHORITY\\NETWORK SERVICE\nLogonGuid: {A2FC6897-EA0A-5B98-0000-0020E4030000}\nLogonId: 0x3e4\nTerminalSessionId: 0\nIntegrityLevel: System\nHashes: SHA256=CBE2392792D209E15E44AC29E906FFDD5FBF6EED8BAB0D97D66E109AB2C5C56E\nParentProcessGuid: {A2FC6897-EA0A-5B98-0000-00100ACA0000}\nParentProcessId: 612\nParentImage: C:\\Windows\\System32\\svchost.exe\nParentCommandLine: C:\\Windows\\system32\\svchost.exe -k DcomLaunch",
-   "opcode":"Info",
-   "process_id":940,
-   "provider_guid":"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
-   "record_number":"109671",
-   "source_name":"Microsoft-Windows-Sysmon",
-   "task":"Process Create (rule: ProcessCreate)",
-   "thread_id":2500,
-   "type":"wineventlog",
-   "user":{
-      "domain":"NT AUTHORITY",
-      "identifier":"S-1-5-18",
-      "name":"SYSTEM",
-      "type":"User"
-   },
-   "version":5
+  "agent": {
+    "ip": "10.0.2.6",
+    "name": "DESKTOP-9LO9B7Q",
+    "id": "007"
+  },
+  "manager": {
+    "name": "zachary-VirtualBox"
+  },
+  "data": {
+    "win": {
+      "eventdata": {
+        "originalFileName": "svchost.exe",
+        "image": "C:\\\\Windows\\\\System32\\\\svchost.exe",
+        "product": "Microsoft® Windows® Operating System",
+        "parentProcessGuid": "{00000000-0000-0000-0000-000000000000}",
+        "description": "Host Process for Windows Services",
+        "logonGuid": "{32fb43f2-7780-63ab-e703-000000000000}",
+        "processGuid": "{32fb43f2-9d53-63ab-8414-000000001b00}",
+        "logonId": "0x3e7",
+        "parentProcessId": "660",
+        "processId": "4644",
+        "currentDirectory": "C:\\\\Windows\\\\system32\\\\",
+        "utcTime": "2022-12-28 01:35:15.998",
+        "hashes": "SHA256=643EC58E82E0272C97C2A59F6020970D881AF19C0AD5029DB9C958C13B6558C7",
+        "company": "Microsoft Corporation",
+        "commandLine": "C:\\\\Windows\\\\system32\\\\svchost.exe -k LocalSystemNetworkRestricted",
+        "integrityLevel": "System",
+        "fileVersion": "10.0.19041.546 (WinBuild.160101.0800)",
+        "user": "NT AUTHORITY\\\\SYSTEM",
+        "terminalSessionId": "0"
+      },
+      "system": {
+        "eventID": "1",
+        "keywords": "0x8000000000000000",
+        "providerGuid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+        "level": "4",
+        "channel": "Microsoft-Windows-Sysmon/Operational",
+        "opcode": "0",
+        "message": "\"Process Create:\r\nRuleName: -\r\nUtcTime: 2022-12-28 01:35:15.998\r\nProcessGuid: {32fb43f2-9d53-63ab-8414-000000001b00}\r\nProcessId: 4644\r\nImage: C:\\Windows\\System32\\svchost.exe\r\nFileVersion: 10.0.19041.546 (WinBuild.160101.0800)\r\nDescription: Host Process for Windows Services\r\nProduct: Microsoft® Windows® Operating System\r\nCompany: Microsoft Corporation\r\nOriginalFileName: svchost.exe\r\nCommandLine: C:\\Windows\\system32\\svchost.exe -k LocalSystemNetworkRestricted\r\nCurrentDirectory: C:\\Windows\\system32\\\r\nUser: NT AUTHORITY\\SYSTEM\r\nLogonGuid: {32fb43f2-7780-63ab-e703-000000000000}\r\nLogonId: 0x3E7\r\nTerminalSessionId: 0\r\nIntegrityLevel: System\r\nHashes: SHA256=643EC58E82E0272C97C2A59F6020970D881AF19C0AD5029DB9C958C13B6558C7\r\nParentProcessGuid: {00000000-0000-0000-0000-000000000000}\r\nParentProcessId: 660\r\nParentImage: -\r\nParentCommandLine: -\r\nParentUser: -\"",
+        "version": "5",
+        "systemTime": "2022-12-28T01:35:16.0024910Z",
+        "eventRecordID": "59112",
+        "threadID": "2748",
+        "computer": "DESKTOP-9LO9B7Q",
+        "task": "1",
+        "processID": "2128",
+        "severityValue": "INFORMATION",
+        "providerName": "Microsoft-Windows-Sysmon"
+      }
+    }
+  },
+  "rule": {
+    "firedtimes": 27,
+    "mail": true,
+    "level": 12,
+    "pci_dss": [
+      "10.6.1",
+      "11.4"
+    ],
+    "hipaa": [
+      "164.312.b"
+    ],
+    "tsc": [
+      "CC7.2",
+      "CC7.3",
+      "CC6.1",
+      "CC6.8"
+    ],
+    "description": "Sysmon - Suspicious Process - svchost.exe",
+    "groups": [
+      "windows",
+      "sysmon",
+      "sysmon_process-anomalies"
+    ],
+    "mitre": {
+      "technique": [
+        "Process Injection"
+      ],
+      "id": [
+        "T1055"
+      ],
+      "tactic": [
+        "Defense Evasion",
+        "Privilege Escalation"
+      ]
+    },
+    "id": "61618",
+    "nist_800_53": [
+      "AU.6",
+      "SI.4"
+    ],
+    "gdpr": [
+      "IV_35.7.d"
+    ]
+  },
+  "decoder": {
+    "name": "windows_eventchannel"
+  },
+  "full_log": "{\"win\":{\"system\":{\"providerName\":\"Microsoft-Windows-Sysmon\",\"providerGuid\":\"{5770385f-c22a-43e0-bf4c-06f5698ffbd9}\",\"eventID\":\"1\",\"version\":\"5\",\"level\":\"4\",\"task\":\"1\",\"opcode\":\"0\",\"keywords\":\"0x8000000000000000\",\"systemTime\":\"2022-12-28T01:35:16.0024910Z\",\"eventRecordID\":\"59112\",\"processID\":\"2128\",\"threadID\":\"2748\",\"channel\":\"Microsoft-Windows-Sysmon/Operational\",\"computer\":\"DESKTOP-9LO9B7Q\",\"severityValue\":\"INFORMATION\",\"message\":\"\\\"Process Create:\\r\\nRuleName: -\\r\\nUtcTime: 2022-12-28 01:35:15.998\\r\\nProcessGuid: {32fb43f2-9d53-63ab-8414-000000001b00}\\r\\nProcessId: 4644\\r\\nImage: C:\\\\Windows\\\\System32\\\\svchost.exe\\r\\nFileVersion: 10.0.19041.546 (WinBuild.160101.0800)\\r\\nDescription: Host Process for Windows Services\\r\\nProduct: Microsoft® Windows® Operating System\\r\\nCompany: Microsoft Corporation\\r\\nOriginalFileName: svchost.exe\\r\\nCommandLine: C:\\\\Windows\\\\system32\\\\svchost.exe -k LocalSystemNetworkRestricted\\r\\nCurrentDirectory: C:\\\\Windows\\\\system32\\\\\\r\\nUser: NT AUTHORITY\\\\SYSTEM\\r\\nLogonGuid: {32fb43f2-7780-63ab-e703-000000000000}\\r\\nLogonId: 0x3E7\\r\\nTerminalSessionId: 0\\r\\nIntegrityLevel: System\\r\\nHashes: SHA256=643EC58E82E0272C97C2A59F6020970D881AF19C0AD5029DB9C958C13B6558C7\\r\\nParentProcessGuid: {00000000-0000-0000-0000-000000000000}\\r\\nParentProcessId: 660\\r\\nParentImage: -\\r\\nParentCommandLine: -\\r\\nParentUser: -\\\"\"},\"eventdata\":{\"utcTime\":\"2022-12-28 01:35:15.998\",\"processGuid\":\"{32fb43f2-9d53-63ab-8414-000000001b00}\",\"processId\":\"4644\",\"image\":\"C:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\svchost.exe\",\"fileVersion\":\"10.0.19041.546 (WinBuild.160101.0800)\",\"description\":\"Host Process for Windows Services\",\"product\":\"Microsoft® Windows® Operating System\",\"company\":\"Microsoft Corporation\",\"originalFileName\":\"svchost.exe\",\"commandLine\":\"C:\\\\\\\\Windows\\\\\\\\system32\\\\\\\\svchost.exe -k LocalSystemNetworkRestricted\",\"currentDirectory\":\"C:\\\\\\\\Windows\\\\\\\\system32\\\\\\\\\",\"user\":\"NT AUTHORITY\\\\\\\\SYSTEM\",\"logonGuid\":\"{32fb43f2-7780-63ab-e703-000000000000}\",\"logonId\":\"0x3e7\",\"terminalSessionId\":\"0\",\"integrityLevel\":\"System\",\"hashes\":\"SHA256=643EC58E82E0272C97C2A59F6020970D881AF19C0AD5029DB9C958C13B6558C7\",\"parentProcessGuid\":\"{00000000-0000-0000-0000-000000000000}\",\"parentProcessId\":\"660\"}}}",
+  "input": {
+    "type": "log"
+  },
+  "@timestamp": "2022-12-28T01:35:16.614Z",
+  "location": "EventChannel",
+  "id": "1672191316.26025597",
+  "timestamp": "2022-12-27T17:35:16.614-0800",
+  "_id": "lSleVoUBP2FetjEtpLNr"
 }
 ```
 ### Suricata
