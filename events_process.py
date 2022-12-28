@@ -1,7 +1,7 @@
 """
 This file is for functions related to processing the different kinds of events in data.txt
 """
-from observables import NETFLOW_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, WINLOG_ATTACK_FEATURES
+from observables import NETWORK_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, WINLOG_ATTACK_FEATURES
 from definitions import HOST_IPS, WAZUH
 from util import split_filepath, command_param_list
 from stats import evaluate_machine
@@ -59,30 +59,30 @@ def reduce_event(meta_event) -> Dict[str, str]:
     return event_dict
 
 
-def generate_netflow_pairs(netflow_events) -> Dict:
-    netflow_pairs = dict()
+def generate_network_pairs(network_events) -> Dict:
+    network_pairs = dict()
     if WAZUH:
-        for event in netflow_events:
+        for event in network_events:
             if 'data' in event:
-                netflow = event['data']
+                suricata = event['data']
                 src = "N/A"
                 dst = "N/A"
-                if 'src_ip' in netflow:
-                    src = netflow['src_ip']
-                if 'dest_ip' in netflow:
-                    dst = netflow['dest_ip']
-                if src in HOST_IPS and dst in HOST_IPS and 'dest_port' in netflow:
+                if 'src_ip' in suricata:
+                    src = suricata['src_ip']
+                if 'dest_ip' in suricata:
+                    dst = suricata['dest_ip']
+                if src in HOST_IPS and dst in HOST_IPS and 'dest_port' in suricata:
                     host_pair = (src, dst)
                     payload = {
-                        'dest_port': netflow['dest_port'],
+                        'dest_port': suricata['dest_port'],
                         '@timestamp': event['@timestamp']
                     }
-                    if host_pair in netflow_pairs:
-                        netflow_pairs[host_pair] = netflow_pairs[host_pair] + [payload]
+                    if host_pair in network_pairs:
+                        network_pairs[host_pair] = network_pairs[host_pair] + [payload]
                     else:
-                        netflow_pairs[host_pair] = [payload]
+                        network_pairs[host_pair] = [payload]
     else:
-        for event in netflow_events:
+        for event in network_events:
             netflow = event['netflow']
             src = netflow['ipv4_src_addr']
             dst = netflow['ipv4_dst_addr']
@@ -92,11 +92,11 @@ def generate_netflow_pairs(netflow_events) -> Dict:
                     'destination_port': netflow['l4_dst_port'],
                     '@timestamp': event['@timestamp']
                 }
-                if host_pair in netflow_pairs:
-                    netflow_pairs[host_pair] = netflow_pairs[host_pair] + [payload]
+                if host_pair in network_pairs:
+                    network_pairs[host_pair] = network_pairs[host_pair] + [payload]
                 else:
-                    netflow_pairs[host_pair] = [payload]
-    return netflow_pairs
+                    network_pairs[host_pair] = [payload]
+    return network_pairs
 
 
 def process_sysmon(hostname, process_create_events, sysmon_counter) -> Dict:
@@ -131,12 +131,23 @@ def process_winlogs(hostname, security_events, winlog_counter) -> Dict:
     return cdata
 
 
+def process_suricata(src, dst, logs, suricata_counter) -> Dict:
+    message = f'SURICATA STATISTICS FOR SRC: {src}, DST: {dst}'
+    banner = '0' * len(message)
+    print(banner)
+    print(message)
+    print(banner)
+    ndata = evaluate_machine(logs, NETWORK_ATTACK_FEATURES, suricata_counter)
+    print_evaluation(ndata)
+    return ndata
+
+
 def process_netflow(src, dst, logs, netflow_counter) -> Dict:
     message = f'NETFLOW STATISTICS FOR SRC: {src}, DST: {dst}'
     banner = '0' * len(message)
     print(banner)
     print(message)
     print(banner)
-    ndata = evaluate_machine(logs, NETFLOW_ATTACK_FEATURES, netflow_counter)
+    ndata = evaluate_machine(logs, NETWORK_ATTACK_FEATURES, netflow_counter)
     print_evaluation(ndata)
     return ndata

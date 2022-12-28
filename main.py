@@ -4,11 +4,10 @@ import numpy as np
 
 from definitions import HOST_IPS, HOST_TO_IP, HOSTNAMES, DATA_FILE
 from ftactic import get_tactic_matrix
-from observables import NETFLOW_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, TACTICS, WINLOG_ATTACK_FEATURES
-from util import aggregate_matrix, safe_divide, split_filepath, command_param_list, formalize_file, print_matrix, \
-    print_sparse_matrix, filter_events
-from stats import evaluate_machine, process_event_counts, generate_event_counter
-from events_process import print_evaluation, process_sysmon, process_winlogs, process_netflow, generate_netflow_pairs
+from observables import TACTICS
+from util import aggregate_matrix, safe_divide, formalize_file, print_matrix, print_sparse_matrix, filter_events
+from stats import process_event_counts, generate_event_counter
+from events_process import process_sysmon, process_winlogs, process_suricata, generate_network_pairs
 
 np.set_printoptions(precision=2, suppress=True)
 
@@ -16,11 +15,11 @@ np.set_printoptions(precision=2, suppress=True)
 # use -h or --help to display more information on the command line
 parser = argparse.ArgumentParser(description='Configure the execution of the TOMATO script!',
                                  epilog='Thanks for using our program!')
-parser.add_argument('-n',
-                    '--netflow',
+parser.add_argument('-su',
+                    '--suricata',
                     action='store_true',
                     default=False,
-                    help='Use the netflow data and features.')
+                    help='Use the suricata data and features.')
 parser.add_argument('-s',
                     '--sysmon',
                     action='store_true',
@@ -36,13 +35,13 @@ args = parser.parse_args()
 
 USE_SYSMON = args.sysmon
 USE_WINLOG = args.winlog
-USE_NETFLOW = args.netflow
+USE_SURICATA = args.suricata
 
 message_builder = 'Initializing a full stats run with '
 message_data = {
     'sysmon': USE_SYSMON,
     'winlog': USE_WINLOG,
-    'netflow': USE_NETFLOW
+    'suricata': USE_SURICATA
 }
 
 usable_parameters = list(map(lambda x: x[0], filter(lambda x: x[1] is True, message_data.items())))
@@ -68,20 +67,20 @@ formalize_file(DATA_FILE)
 
 process_create_events = list()
 security_events = list()
-netflow_events = list()
+suricata_events = list()
 
 if USE_SYSMON:
     process_create_events = filter_events('Microsoft-Windows-Sysmon')
 if USE_WINLOG:
     security_events = filter_events('Microsoft-Windows-Security')
-if USE_NETFLOW:
-    netflow_events = filter_events('Suricata')
+if USE_SURICATA:
+    suricata_events = filter_events('Suricata')
 
 print('Loading complete')
 
 sysmon_counter = process_event_counts
 winlog_counter = generate_event_counter('eventID')
-netflow_counter = generate_event_counter('dest_port')
+suricata_counter = generate_event_counter('dest_port')
 
 # Sysmon
 sdata = dict()
@@ -109,13 +108,13 @@ src_log_counts = np.zeros(host_index)
 dst_log_counts = np.zeros(host_index)
 total_log_count = 0
 
-# Netflow
+# Suricata
 ndata = dict()
-netflow_pairs = generate_netflow_pairs(netflow_events)
-if USE_NETFLOW:
-    for keys, logs in netflow_pairs.items():
+suricata_pairs = generate_network_pairs(suricata_events)
+if USE_SURICATA:
+    for keys, logs in suricata_pairs.items():
         src, dst = keys
-        ndata[src, dst] = process_netflow(src, dst, logs, netflow_counter)
+        ndata[src, dst] = process_suricata(src, dst, logs, suricata_counter)
 
 f_tactic_matrix = get_tactic_matrix('data/tactic_matrix.npy', hostname_indices)
 
@@ -140,8 +139,8 @@ for tactic in TACTICS.keys():
 
     p_cpd[tactic] = matrix
 
-if USE_NETFLOW:
-    for keys, logs in netflow_pairs.items():
+if USE_SURICATA:
+    for keys, logs in suricata_pairs.items():
         src, dst = keys
         i = host_indices[src]
         j = host_indices[dst]

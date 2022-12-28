@@ -126,7 +126,7 @@ WINLOG_ATTACK_FEATURES = {
     'valid_accounts': [528, 552, 4648]
 }
 
-NETFLOW_ATTACK_FEATURES = {
+NETWORK_ATTACK_FEATURES = {
     'application_deployment_software': [80, 443, 8443, 8082],
     'dcom': [135, 138, 139, 445],
     'logon_scripts': [445, 139],
