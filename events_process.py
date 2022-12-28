@@ -1,5 +1,6 @@
 """
 This file is for functions related to processing the different kinds of events in data.txt
+The code in this file is adapted from https://github.com/TorNATO-PRO/TOMATO by Nathan Waltz
 """
 from observables import NETWORK_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, WINLOG_ATTACK_FEATURES
 from definitions import HOST_IPS, WAZUH

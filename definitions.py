@@ -1,5 +1,6 @@
 """
 Global Constants that will be used throughout the project.
+The code in this file is adapted from https://github.com/TorNATO-PRO/TOMATO by Nathan Waltz
 """
 from itertools import product
 from typing import KeysView

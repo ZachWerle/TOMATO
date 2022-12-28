@@ -1,9 +1,9 @@
 # TOMATO
 Cyberobservability Project
 
-Creating a new metric to expand on research done in https://ieeexplore.ieee.org/abstract/document/8788508.
+This version of TOMATO is specifically adapted for Wazuh alerts/logs
 
-Python Version: 3.8.10-yo-mama
+Python Version: 3.11.1
 
 ## Data Format Samples
 
@@ -37,21 +37,99 @@ Python Version: 3.8.10-yo-mama
 ### Security
 ```json
 {
-   "@timestamp":"2017-11-05T07:00:00.113Z",
-   "beat":{
-      "hostname":"HP-B53-01",
-      "name":"HP-B53-01"
-   },
-   "category":"Logon",
-   "computer_name":"HP-B53-01",
-   "count":1,
-   "event_id":4624,
-   "level":"Information",
-   "log_name":"Security",
-   "message":"An account was successfully logged on.\n\nSubject:\n\tSecurity ID:\t\tS-1-5-18\n\tAccount Name:\t\tHP-B53-01$\n\tAccount Domain:\t\tEME006\n\tLogon ID:\t\t0x3e7\n\nLogon Type:\t\t\t5\n\nNew Logon:\n\tSecurity ID:\t\tS-1-5-18\n\tAccount Name:\t\tSYSTEM\n\tAccount Domain:\t\tNT AUTHORITY\n\tLogon ID:\t\t0x3e7\n\tLogon GUID:\t\t{00000000-0000-0000-0000-000000000000}\n\nProcess Information:\n\tProcess ID:\t\t0x2d4\n\tProcess Name:\t\tC:\\Windows\\System32\\services.exe\n\nNetwork Information:\n\tWorkstation Name:\t\n\tSource Network Address:\t-\n\tSource Port:\t\t-\n\nDetailed Authentication Information:\n\tLogon Process:\t\tAdvapi  \n\tAuthentication Package:\tNegotiate\n\tTransited Services:\t-\n\tPackage Name (NTLM only):\t-\n\tKey Length:\t\t0\n\nThis event is generated when a logon session is created. It is generated on the computer that was accessed.\n\nThe subject fields indicate the account on the local system which requested the logon. This is most commonly a service such as the Server service, or a local process such as Winlogon.exe or Services.exe.\n\nThe logon type field indicates the kind of logon that occurred. The most common types are 2 (interactive) and 3 (network).\n\nThe New Logon fields indicate the account for whom the new logon was created, i.e. the account that was logged on.\n\nThe network fields indicate where a remote logon request originated. Workstation name is not always available and may be left blank in some cases.\n\nThe authentication information fields provide detailed information about this specific logon request.\n\t- Logon GUID is a unique identifier that can be used to correlate this event with a KDC event.\n\t- Transited services indicate which intermediate services have participated in this logon request.\n\t- Package name indicates which sub-protocol was used among the NTLM protocols.\n\t- Key length indicates the length of the generated session key. This will be 0 if no session key was requested.",
-   "record_number":"74784",
-   "source_name":"Microsoft-Windows-Security-Auditing",
-   "type":"wineventlog"
+  "agent": {
+    "ip": "10.0.2.9",
+    "name": "DESKTOP-CKP652S",
+    "id": "004"
+  },
+  "manager": {
+    "name": "zachary-VirtualBox"
+  },
+  "data": {
+    "win": {
+      "eventdata": {
+        "subjectLogonId": "0x3e7",
+        "subjectDomainName": "WORKGROUP",
+        "targetLinkedLogonId": "0xfe8a7",
+        "impersonationLevel": "%%1833",
+        "ipAddress": "127.0.0.1",
+        "authenticationPackageName": "Negotiate",
+        "workstationName": "DESKTOP-CKP652S",
+        "targetLogonId": "0xfe8ef",
+        "logonProcessName": "User32",
+        "logonGuid": "{00000000-0000-0000-0000-000000000000}",
+        "targetUserName": "mr.polite101@gmail.com",
+        "keyLength": "0",
+        "elevatedToken": "%%1843",
+        "subjectUserSid": "S-1-5-18",
+        "processId": "0x1a4",
+        "processName": "C:\\\\Windows\\\\System32\\\\svchost.exe",
+        "ipPort": "0",
+        "targetDomainName": "MicrosoftAccount",
+        "targetUserSid": "S-1-5-21-1031314314-1681699775-55260578-1002",
+        "virtualAccount": "%%1843",
+        "logonType": "11",
+        "subjectUserName": "DESKTOP-CKP652S$"
+      },
+      "system": {
+        "eventID": "4624",
+        "keywords": "0x8020000000000000",
+        "providerGuid": "{54849625-5478-4994-a5ba-3e3b0328c30d}",
+        "level": "0",
+        "channel": "Security",
+        "opcode": "0",
+        "message": "\"An account was successfully logged on.\r\n\r\nSubject:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tDESKTOP-CKP652S$\r\n\tAccount Domain:\t\tWORKGROUP\r\n\tLogon ID:\t\t0x3E7\r\n\r\nLogon Information:\r\n\tLogon Type:\t\t11\r\n\tRestricted Admin Mode:\t-\r\n\tVirtual Account:\t\tNo\r\n\tElevated Token:\t\tNo\r\n\r\nImpersonation Level:\t\tImpersonation\r\n\r\nNew Logon:\r\n\tSecurity ID:\t\tS-1-5-21-1031314314-1681699775-55260578-1002\r\n\tAccount Name:\t\tmr.polite101@gmail.com\r\n\tAccount Domain:\t\tMicrosoftAccount\r\n\tLogon ID:\t\t0xFE8EF\r\n\tLinked Logon ID:\t\t0xFE8A7\r\n\tNetwork Account Name:\t-\r\n\tNetwork Account Domain:\t-\r\n\tLogon GUID:\t\t{00000000-0000-0000-0000-000000000000}\r\n\r\nProcess Information:\r\n\tProcess ID:\t\t0x1a4\r\n\tProcess Name:\t\tC:\\Windows\\System32\\svchost.exe\r\n\r\nNetwork Information:\r\n\tWorkstation Name:\tDESKTOP-CKP652S\r\n\tSource Network Address:\t127.0.0.1\r\n\tSource Port:\t\t0\r\n\r\nDetailed Authentication Information:\r\n\tLogon Process:\t\tUser32 \r\n\tAuthentication Package:\tNegotiate\r\n\tTransited Services:\t-\r\n\tPackage Name (NTLM only):\t-\r\n\tKey Length:\t\t0\r\n\r\nThis event is generated when a logon session is created. It is generated on the computer that was accessed.\r\n\r\nThe subject fields indicate the account on the local system which requested the logon. This is most commonly a service such as the Server service, or a local process such as Winlogon.exe or Services.exe.\r\n\r\nThe logon type field indicates the kind of logon that occurred. The most common types are 2 (interactive) and 3 (network).\r\n\r\nThe New Logon fields indicate the account for whom the new logon was created, i.e. the account that was logged on.\r\n\r\nThe network fields indicate where a remote logon request originated. Workstation name is not always available and may be left blank in some cases.\r\n\r\nThe impersonation level field indicates the extent to which a process in the logon session can impersonate.\r\n\r\nThe authentication information fields provide detailed information about this specific logon request.\r\n\t- Logon GUID is a unique identifier that can be used to correlate this event with a KDC event.\r\n\t- Transited services indicate which intermediate services have participated in this logon request.\r\n\t- Package name indicates which sub-protocol was used among the NTLM protocols.\r\n\t- Key length indicates the length of the generated session key. This will be 0 if no session key was requested.\"",
+        "version": "2",
+        "systemTime": "2022-12-27T22:57:20.6791696Z",
+        "eventRecordID": "36349",
+        "threadID": "796",
+        "computer": "DESKTOP-CKP652S",
+        "task": "12544",
+        "processID": "696",
+        "severityValue": "AUDIT_SUCCESS",
+        "providerName": "Microsoft-Windows-Security-Auditing"
+      }
+    }
+  },
+  "rule": {
+    "firedtimes": 10,
+    "mail": true,
+    "level": 15,
+    "description": "User: WORKGROUP\\mr.polite101@gmail.com logged using Remote Desktop Connection (RDP) from loopback address, possible exploit over reverse tunneling using stolen credentials.",
+    "groups": [
+      "win_evt_channel"
+    ],
+    "mitre": {
+      "technique": [
+        "Remote Desktop Protocol",
+        "Domain Accounts"
+      ],
+      "id": [
+        "T1021.001",
+        "T1078.002"
+      ],
+      "tactic": [
+        "Lateral Movement",
+        "Defense Evasion",
+        "Persistence",
+        "Privilege Escalation",
+        "Initial Access"
+      ]
+    },
+    "id": "92656"
+  },
+  "decoder": {
+    "name": "windows_eventchannel"
+  },
+  "full_log": "{\"win\":{\"system\":{\"providerName\":\"Microsoft-Windows-Security-Auditing\",\"providerGuid\":\"{54849625-5478-4994-a5ba-3e3b0328c30d}\",\"eventID\":\"4624\",\"version\":\"2\",\"level\":\"0\",\"task\":\"12544\",\"opcode\":\"0\",\"keywords\":\"0x8020000000000000\",\"systemTime\":\"2022-12-27T22:57:20.6791696Z\",\"eventRecordID\":\"36349\",\"processID\":\"696\",\"threadID\":\"796\",\"channel\":\"Security\",\"computer\":\"DESKTOP-CKP652S\",\"severityValue\":\"AUDIT_SUCCESS\",\"message\":\"\\\"An account was successfully logged on.\\r\\n\\r\\nSubject:\\r\\n\\tSecurity ID:\\t\\tS-1-5-18\\r\\n\\tAccount Name:\\t\\tDESKTOP-CKP652S$\\r\\n\\tAccount Domain:\\t\\tWORKGROUP\\r\\n\\tLogon ID:\\t\\t0x3E7\\r\\n\\r\\nLogon Information:\\r\\n\\tLogon Type:\\t\\t11\\r\\n\\tRestricted Admin Mode:\\t-\\r\\n\\tVirtual Account:\\t\\tNo\\r\\n\\tElevated Token:\\t\\tNo\\r\\n\\r\\nImpersonation Level:\\t\\tImpersonation\\r\\n\\r\\nNew Logon:\\r\\n\\tSecurity ID:\\t\\tS-1-5-21-1031314314-1681699775-55260578-1002\\r\\n\\tAccount Name:\\t\\tmr.polite101@gmail.com\\r\\n\\tAccount Domain:\\t\\tMicrosoftAccount\\r\\n\\tLogon ID:\\t\\t0xFE8EF\\r\\n\\tLinked Logon ID:\\t\\t0xFE8A7\\r\\n\\tNetwork Account Name:\\t-\\r\\n\\tNetwork Account Domain:\\t-\\r\\n\\tLogon GUID:\\t\\t{00000000-0000-0000-0000-000000000000}\\r\\n\\r\\nProcess Information:\\r\\n\\tProcess ID:\\t\\t0x1a4\\r\\n\\tProcess Name:\\t\\tC:\\\\Windows\\\\System32\\\\svchost.exe\\r\\n\\r\\nNetwork Information:\\r\\n\\tWorkstation Name:\\tDESKTOP-CKP652S\\r\\n\\tSource Network Address:\\t127.0.0.1\\r\\n\\tSource Port:\\t\\t0\\r\\n\\r\\nDetailed Authentication Information:\\r\\n\\tLogon Process:\\t\\tUser32 \\r\\n\\tAuthentication Package:\\tNegotiate\\r\\n\\tTransited Services:\\t-\\r\\n\\tPackage Name (NTLM only):\\t-\\r\\n\\tKey Length:\\t\\t0\\r\\n\\r\\nThis event is generated when a logon session is created. It is generated on the computer that was accessed.\\r\\n\\r\\nThe subject fields indicate the account on the local system which requested the logon. This is most commonly a service such as the Server service, or a local process such as Winlogon.exe or Services.exe.\\r\\n\\r\\nThe logon type field indicates the kind of logon that occurred. The most common types are 2 (interactive) and 3 (network).\\r\\n\\r\\nThe New Logon fields indicate the account for whom the new logon was created, i.e. the account that was logged on.\\r\\n\\r\\nThe network fields indicate where a remote logon request originated. Workstation name is not always available and may be left blank in some cases.\\r\\n\\r\\nThe impersonation level field indicates the extent to which a process in the logon session can impersonate.\\r\\n\\r\\nThe authentication information fields provide detailed information about this specific logon request.\\r\\n\\t- Logon GUID is a unique identifier that can be used to correlate this event with a KDC event.\\r\\n\\t- Transited services indicate which intermediate services have participated in this logon request.\\r\\n\\t- Package name indicates which sub-protocol was used among the NTLM protocols.\\r\\n\\t- Key length indicates the length of the generated session key. This will be 0 if no session key was requested.\\\"\"},\"eventdata\":{\"subjectUserSid\":\"S-1-5-18\",\"subjectUserName\":\"DESKTOP-CKP652S$\",\"subjectDomainName\":\"WORKGROUP\",\"subjectLogonId\":\"0x3e7\",\"targetUserSid\":\"S-1-5-21-1031314314-1681699775-55260578-1002\",\"targetUserName\":\"mr.polite101@gmail.com\",\"targetDomainName\":\"MicrosoftAccount\",\"targetLogonId\":\"0xfe8ef\",\"logonType\":\"11\",\"logonProcessName\":\"User32\",\"authenticationPackageName\":\"Negotiate\",\"workstationName\":\"DESKTOP-CKP652S\",\"logonGuid\":\"{00000000-0000-0000-0000-000000000000}\",\"keyLength\":\"0\",\"processId\":\"0x1a4\",\"processName\":\"C:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\svchost.exe\",\"ipAddress\":\"127.0.0.1\",\"ipPort\":\"0\",\"impersonationLevel\":\"%%1833\",\"virtualAccount\":\"%%1843\",\"targetLinkedLogonId\":\"0xfe8a7\",\"elevatedToken\":\"%%1843\"}}}",
+  "input": {
+    "type": "log"
+  },
+  "@timestamp": "2022-12-27T22:57:22.221Z",
+  "location": "EventChannel",
+  "id": "1672181842.597751",
+  "timestamp": "2022-12-27T14:57:22.221-0800",
+  "_id": "3yjOVYUBP2FetjEtLC-e"
 }
 ```
 
@@ -106,5 +184,75 @@ Python Version: 3.8.10-yo-mama
       "type":"User"
    },
    "version":5
+}
+```
+### Suricata
+```json
+{
+  "agent": {
+    "ip": "10.0.2.6",
+    "name": "DESKTOP-9LO9B7Q",
+    "id": "007"
+  },
+  "manager": {
+    "name": "zachary-VirtualBox"
+  },
+  "data": {
+    "in_iface": "\\Device\\NPF_{AA371BF3-1C48-40C2-9559-328769FC414F}",
+    "src_ip": "10.0.2.8",
+    "src_port": "52664",
+    "event_type": "alert",
+    "alert": {
+      "severity": "2",
+      "signature_id": "2003068",
+      "rev": "7",
+      "metadata": {
+        "updated_at": [
+          "2010_07_30"
+        ],
+        "created_at": [
+          "2010_07_30"
+        ]
+      },
+      "gid": "1",
+      "signature": "ET SCAN Potential SSH Scan OUTBOUND",
+      "action": "allowed",
+      "category": "Attempted Information Leak"
+    },
+    "flow_id": "1267808264914164.000000",
+    "dest_ip": "10.0.2.6",
+    "proto": "TCP",
+    "dest_port": "22",
+    "flow": {
+      "pkts_toserver": "1",
+      "start": "2022-12-27T17:35:02.918772-0900",
+      "bytes_toclient": "0",
+      "bytes_toserver": "66",
+      "pkts_toclient": "0"
+    },
+    "timestamp": "2022-12-27T17:35:02.918772-0900"
+  },
+  "rule": {
+    "firedtimes": 107,
+    "mail": false,
+    "level": 3,
+    "description": "Suricata: Alert - ET SCAN Potential SSH Scan OUTBOUND",
+    "groups": [
+      "ids",
+      "suricata"
+    ],
+    "id": "86601"
+  },
+  "decoder": {
+    "name": "json"
+  },
+  "input": {
+    "type": "log"
+  },
+  "@timestamp": "2022-12-28T01:35:04.971Z",
+  "location": "\\Program Files\\Suricata\\log\\eve.json",
+  "id": "1672191304.26000539",
+  "timestamp": "2022-12-27T17:35:04.971-0800",
+  "_id": "iyleVoUBP2FetjEtbbO1"
 }
 ```

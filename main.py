@@ -1,3 +1,7 @@
+"""
+This program is used to analyze the observability of sensors/data collection tools in a network.
+The code in this file is adapted from https://github.com/TorNATO-PRO/TOMATO by Nathan Waltz
+"""
 import argparse
 from functools import reduce
 import numpy as np
