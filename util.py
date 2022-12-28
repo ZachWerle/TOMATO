@@ -1,4 +1,5 @@
 import numpy as np
+import json
 from typing import Dict
 
 
@@ -26,11 +27,12 @@ def aggregate_matrix(matrix):
 
 
 def formalize_file(file_path):
-    infile = open(file_path, "r")
-    outfile = open("data/data.txt", "w")
+    infile = open(file_path, "r", encoding="utf8")
+    outfile = open("data/data.txt", "w", encoding="utf8")
     for line in infile.readlines():
         new_line = line.replace(":true", ":True")
         new_line = new_line.replace(":false", ":False")
+        new_line = new_line.replace("timestamp", "@timestamp")
         outfile.write(new_line)
     infile.close()
     outfile.close()
@@ -58,3 +60,23 @@ def print_sparse_matrix(matrix_table: Dict[str, np.ndarray]) -> None:
                         print()
                         entries = 0
         print()
+
+
+def filter_events(filepath_keyword) -> list:
+    events = list()
+    with open("data/data.txt", encoding="utf8") as file:
+        lines = map(lambda line: eval(line.strip()), file.readlines())
+        all_events = list(map(lambda line: json.loads(json.dumps(line)), lines))
+        for event in all_events:
+            if 'full_log' in event and filepath_keyword.casefold() in event['full_log'].casefold():
+                events += [event]
+            elif 'location' in event and filepath_keyword.casefold() in event['location'].casefold():
+                events += [event]
+            elif 'data' in event and 'win' in event['data'] \
+                    and filepath_keyword.casefold() in event['data']['win']['system']['providerName'].casefold():
+                events += [event]
+            elif 'rule' in event:
+                for group in event['rule']['groups']:
+                    if filepath_keyword.casefold() in group.casefold():
+                        events += [event]
+    return events

@@ -27,15 +27,22 @@ def print_evaluation(stats) -> None:
 def reduce_event(meta_event) -> Dict[str, str]:
     if WAZUH:
         event = meta_event['data']['win']['eventdata']
-        path, file = split_filepath(event['image'])
+        path, file = "N/A", "N/A"
         ppath, pfile = "N/A", "N/A"
+        params = "N/A"
+        if 'image' in event:
+            path, file = split_filepath(event['image'])
+        if 'parentImage' in event:
+            ppath, pfile = split_filepath(event['parentImage'])
+        if 'commandLine' in event:
+            params = command_param_list(event["commandLine"])
         event_dict = {
             'exe': file,
             'parent_exe': pfile,
             'path': path,
             'parent_path': ppath,
-            'params': command_param_list(event["commandLine"]),
-            'timestamp': meta_event['timestamp']
+            'params': params,
+            '@timestamp': meta_event['@timestamp']
         }
     else:
         event = meta_event['event_data']
@@ -56,16 +63,24 @@ def generate_netflow_pairs(netflow_events) -> Dict:
     netflow_pairs = dict()
     if WAZUH:
         for event in netflow_events:
-            netflow = event['data']
-            src = netflow['src_ip']
-            dst = netflow['dest_ip']
-            if src in HOST_IPS and dst in HOST_IPS:
-                host_pair = (src, dst)
-                payload = {
-                    'dest_port': netflow['dest_port'],
-                    'timestamp': event['timestamp']
-                }
-                netflow_pairs[host_pair] = payload
+            if 'data' in event:
+                netflow = event['data']
+                src = "N/A"
+                dst = "N/A"
+                if 'src_ip' in netflow:
+                    src = netflow['src_ip']
+                if 'dest_ip' in netflow:
+                    dst = netflow['dest_ip']
+                if src in HOST_IPS and dst in HOST_IPS and 'dest_port' in netflow:
+                    host_pair = (src, dst)
+                    payload = {
+                        'dest_port': netflow['dest_port'],
+                        '@timestamp': event['@timestamp']
+                    }
+                    if host_pair in netflow_pairs:
+                        netflow_pairs[host_pair] = netflow_pairs[host_pair] + [payload]
+                    else:
+                        netflow_pairs[host_pair] = [payload]
     else:
         for event in netflow_events:
             netflow = event['netflow']
@@ -77,7 +92,10 @@ def generate_netflow_pairs(netflow_events) -> Dict:
                     'destination_port': netflow['l4_dst_port'],
                     '@timestamp': event['@timestamp']
                 }
-                netflow_pairs[host_pair] = payload
+                if host_pair in netflow_pairs:
+                    netflow_pairs[host_pair] = netflow_pairs[host_pair] + [payload]
+                else:
+                    netflow_pairs[host_pair] = [payload]
     return netflow_pairs
 
 

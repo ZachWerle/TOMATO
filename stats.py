@@ -68,7 +68,7 @@ def generate_event_counter(event_key: str):
             counts['num_anomalous'] = counts.get('num_anomalous', 0)
             return counts
         for event in events:
-            if WAZUH:
+            if WAZUH and event_key != 'dest_port':
                 if 'win' in event['data']:
                     id = event['data']['win']['system'][event_key]
                 else:
@@ -114,12 +114,9 @@ def evaluate_machine(events, features, count_function):
 
     results['prob'] = safe_divide(total_anomalous, total_logs)
     timestamps = []
-    timestamp_string = '%Y-%m-%dT%H:%M:%S.%fZ'
+    timestamp_string = '%Y-%m-%dT%H:%M:%S.%f-0800'
     for event in events:
-        if WAZUH:
-            timestamps.append(datetime.datetime.strptime(event['timestamp'], '%Y-%m-%dT%H:%M:%S.%f-0700'))
-        else:
-            timestamps.append(datetime.datetime.strptime(event['@timestamp'], timestamp_string))
+        timestamps.append(datetime.datetime.strptime(event['@timestamp'], timestamp_string))
 
     timestamps.sort()
     if len(events) == 0:

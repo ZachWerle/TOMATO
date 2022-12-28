@@ -1,4 +1,3 @@
-import json
 import argparse
 from functools import reduce
 import numpy as np
@@ -7,7 +6,7 @@ from definitions import HOST_IPS, HOST_TO_IP, HOSTNAMES, DATA_FILE
 from ftactic import get_tactic_matrix
 from observables import NETFLOW_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, TACTICS, WINLOG_ATTACK_FEATURES
 from util import aggregate_matrix, safe_divide, split_filepath, command_param_list, formalize_file, print_matrix, \
-    print_sparse_matrix
+    print_sparse_matrix, filter_events
 from stats import evaluate_machine, process_event_counts, generate_event_counter
 from events_process import print_evaluation, process_sysmon, process_winlogs, process_netflow, generate_netflow_pairs
 
@@ -67,20 +66,16 @@ print("Loading dump files...")
 
 formalize_file(DATA_FILE)
 
-with open("data/data.txt") as sysmon:
-    lines = map(lambda line: eval(line.strip()), sysmon.readlines())
-    process_create_events = list(map(lambda line: json.loads(json.dumps(line)), lines))
-    process_create_events = list(filter(lambda x: 'sysmon' in x['rule']['groups'], process_create_events))
+process_create_events = list()
+security_events = list()
+netflow_events = list()
 
-with open("data/data.txt") as security:
-    lines = map(lambda line: eval(line.strip()), security.readlines())
-    security_events = list(map(lambda line: json.loads(json.dumps(line)), lines))
-    security_events = list(filter(lambda x: 'windows_security' in x['rule']['groups'], security_events))
-
-with open("data/data.txt") as netflow:
-    lines = map(lambda line: eval(line.strip()), netflow.readlines())
-    netflow_events = list(map(lambda line: json.loads(json.dumps(line)), lines))
-    netflow_events = list(filter(lambda x: 'suricata' in x['rule']['groups'], netflow_events))
+if USE_SYSMON:
+    process_create_events = filter_events('Microsoft-Windows-Sysmon')
+if USE_WINLOG:
+    security_events = filter_events('Microsoft-Windows-Security')
+if USE_NETFLOW:
+    netflow_events = filter_events('Suricata')
 
 print('Loading complete')
 
