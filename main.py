@@ -98,7 +98,7 @@ if USE_SYSMON:
     for hostname in HOSTNAMES:
         sdata[hostname] = process_sysmon(hostname, process_create_events, sysmon_counter, OUTPUT_LOGDATA)
 
-# Windows Security Event Channel
+# Windows Event Channel
 cdata = dict()
 if USE_WINEVENT:
     for hostname in HOSTNAMES:
