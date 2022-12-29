@@ -9,7 +9,9 @@ from stats import evaluate_machine
 from typing import Dict
 
 
-def print_evaluation(stats) -> None:
+def print_evaluation(stats, output_logdata) -> None:
+    if not output_logdata:
+        return None
     for key, value in stats['tactics'].items():
         f = value['frequency']
         a = value['anomalous']
@@ -62,7 +64,7 @@ def reduce_event(meta_event) -> Dict[str, str]:
 
 def generate_network_pairs(network_events, use_suricata) -> Dict:
     network_pairs = dict()
-    if use_suricata:
+    if use_suricata and WAZUH:
         for event in network_events:
             if 'data' in event:
                 suricata = event['data']
@@ -100,55 +102,63 @@ def generate_network_pairs(network_events, use_suricata) -> Dict:
     return network_pairs
 
 
-def process_sysmon(hostname, process_create_events, sysmon_counter) -> Dict:
-    message = 'STATISTICS FOR SYSMON LOGS Host: ' + hostname
-    banner = '0' * len(message)
-    print(banner)
-    print(message)
-    print(banner)
+def process_sysmon(hostname, process_create_events, sysmon_counter, output_logdata) -> Dict:
+    if output_logdata:
+        message = 'STATISTICS FOR SYSMON LOGS Host: ' + hostname
+        banner = '0' * len(message)
+        print(banner)
+        print(message)
+        print(banner)
     if WAZUH:
         reduced_events = filter(lambda x: x['agent']['name'] == hostname, process_create_events)
     else:
         reduced_events = filter(lambda x: x['computer_name'] == hostname, process_create_events)
     reduced_events = [reduce_event(event) for event in reduced_events]
     sdata = evaluate_machine(reduced_events, PROCESS_ATTACK_FEATURES, sysmon_counter)
-    print_evaluation(sdata)
+    if output_logdata:
+        print_evaluation(sdata, output_logdata)
     return sdata
 
 
-def process_winevent(hostname, security_events, winevent_counter) -> Dict:
-    message = 'STATISTICS FOR WINDOWS SECURITY LOGS Host: ' + hostname
-    banner = '0' * len(message)
-    print(banner)
-    print(message)
-    print(banner)
+def process_winevent(hostname, security_events, winevent_counter, output_logdata) -> Dict:
+    if output_logdata:
+        message = 'STATISTICS FOR WINDOWS SECURITY LOGS Host: ' + hostname
+        banner = '0' * len(message)
+        print(banner)
+        print(message)
+        print(banner)
     if WAZUH:
         reduced_events = filter(lambda x: x['agent']['name'] == hostname, security_events)
     else:
         reduced_events = filter(lambda x: x['computer_name'] == hostname, security_events)
     reduced_events = list(reduced_events)
     cdata = evaluate_machine(reduced_events, WINEVENT_ATTACK_FEATURES, winevent_counter)
-    print_evaluation(cdata)
+    if output_logdata:
+        print_evaluation(cdata, output_logdata)
     return cdata
 
 
-def process_suricata(src, dst, logs, suricata_counter) -> Dict:
-    message = f'SURICATA STATISTICS FOR SRC: {src}, DST: {dst}'
-    banner = '0' * len(message)
-    print(banner)
-    print(message)
-    print(banner)
+def process_suricata(src, dst, logs, suricata_counter, output_logdata) -> Dict:
+    if output_logdata:
+        message = f'SURICATA STATISTICS FOR SRC: {src}, DST: {dst}'
+        banner = '0' * len(message)
+        print(banner)
+        print(message)
+        print(banner)
     ndata = evaluate_machine(logs, NETWORK_ATTACK_FEATURES, suricata_counter)
-    print_evaluation(ndata)
+    if output_logdata:
+        print_evaluation(ndata, output_logdata)
     return ndata
 
 
-def process_netflow(src, dst, logs, netflow_counter) -> Dict:
-    message = f'NETFLOW STATISTICS FOR SRC: {src}, DST: {dst}'
-    banner = '0' * len(message)
-    print(banner)
-    print(message)
-    print(banner)
+def process_netflow(src, dst, logs, netflow_counter, output_logdata) -> Dict:
+    if output_logdata:
+        message = f'NETFLOW STATISTICS FOR SRC: {src}, DST: {dst}'
+        banner = '0' * len(message)
+        print(banner)
+        print(message)
+        print(banner)
     ndata = evaluate_machine(logs, NETWORK_ATTACK_FEATURES, netflow_counter)
-    print_evaluation(ndata)
+    if output_logdata:
+        print_evaluation(ndata, output_logdata)
     return ndata

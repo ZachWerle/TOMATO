@@ -1,7 +1,10 @@
 # TOMATO
 Cyberobservability Project
 
-This version of TOMATO is specifically adapted for Wazuh alerts/logs
+This program is used to analyze the observability of sensors/data collection tools in a network.
+This version of TOMATO is specifically adapted for Wazuh alerts/logs.
+The code in this project is adapted from https://github.com/TorNATO-PRO/TOMATO by Nathan Waltz which is a continuation of the research at https://ieeexplore.ieee.org/abstract/document/8788508.
+
 
 Python Version: 3.11.1
 

@@ -19,6 +19,11 @@ np.set_printoptions(precision=2, suppress=True)
 # use -h or --help to display more information on the command line
 parser = argparse.ArgumentParser(description='Configure the execution of the TOMATO script!',
                                  epilog='Thanks for using our program!')
+parser.add_argument('-l',
+                    '--logging',
+                    action='store_true',
+                    default=False,
+                    help='Output the log data.')
 parser.add_argument('-su',
                     '--suricata',
                     action='store_true',
@@ -37,11 +42,12 @@ parser.add_argument('-w',
 
 args = parser.parse_args()
 
+OUTPUT_LOGDATA = args.logging
 USE_SYSMON = args.sysmon
 USE_WINEVENT = args.winevent
 USE_SURICATA = args.suricata
 
-message_builder = 'Initializing a full stats run with '
+message_builder = 'Initializing a full stats run with ' if OUTPUT_LOGDATA else 'Normal run with '
 message_data = {
     'sysmon': USE_SYSMON,
     'winevent': USE_WINEVENT,
@@ -90,13 +96,13 @@ suricata_counter = generate_event_counter('dest_port')
 sdata = dict()
 if USE_SYSMON:
     for hostname in HOSTNAMES:
-        sdata[hostname] = process_sysmon(hostname, process_create_events, sysmon_counter)
+        sdata[hostname] = process_sysmon(hostname, process_create_events, sysmon_counter, OUTPUT_LOGDATA)
 
-# Windows Event Channel
+# Windows Security Event Channel
 cdata = dict()
 if USE_WINEVENT:
     for hostname in HOSTNAMES:
-        cdata[hostname] = process_winevent(hostname, security_events, winevent_counter)
+        cdata[hostname] = process_winevent(hostname, security_events, winevent_counter, OUTPUT_LOGDATA)
 
 host_indices = {}
 hostname_indices = {}
@@ -118,7 +124,7 @@ suricata_pairs = generate_network_pairs(suricata_events, USE_SURICATA)
 if USE_SURICATA:
     for keys, logs in suricata_pairs.items():
         src, dst = keys
-        ndata[src, dst] = process_suricata(src, dst, logs, suricata_counter)
+        ndata[src, dst] = process_suricata(src, dst, logs, suricata_counter, OUTPUT_LOGDATA)
 
 f_tactic_matrix = get_tactic_matrix('data/tactic_matrix.npy', hostname_indices)
 
