@@ -104,7 +104,7 @@ PROCESS_ATTACK_FEATURES = {
     ]
 }
 
-WINLOG_ATTACK_FEATURES = {
+WINEVENT_ATTACK_FEATURES = {
     'dcom': [528, 552, 4648],
     'logon_scripts': [528, 552],
     'pass_the_hash': [4624],

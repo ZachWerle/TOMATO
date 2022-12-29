@@ -2,7 +2,7 @@
 This file is for functions related to processing the different kinds of events in data.txt
 The code in this file is adapted from https://github.com/TorNATO-PRO/TOMATO by Nathan Waltz
 """
-from observables import NETWORK_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, WINLOG_ATTACK_FEATURES
+from observables import NETWORK_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, WINEVENT_ATTACK_FEATURES
 from definitions import HOST_IPS, WAZUH
 from util import split_filepath, command_param_list
 from stats import evaluate_machine
@@ -116,7 +116,7 @@ def process_sysmon(hostname, process_create_events, sysmon_counter) -> Dict:
     return sdata
 
 
-def process_winlogs(hostname, security_events, winlog_counter) -> Dict:
+def process_winevent(hostname, security_events, winevent_counter) -> Dict:
     message = 'STATISTICS FOR WINDOWS SECURITY LOGS Host: ' + hostname
     banner = '0' * len(message)
     print(banner)
@@ -127,7 +127,7 @@ def process_winlogs(hostname, security_events, winlog_counter) -> Dict:
     else:
         reduced_events = filter(lambda x: x['computer_name'] == hostname, security_events)
     reduced_events = list(reduced_events)
-    cdata = evaluate_machine(reduced_events, WINLOG_ATTACK_FEATURES, winlog_counter)
+    cdata = evaluate_machine(reduced_events, WINEVENT_ATTACK_FEATURES, winevent_counter)
     print_evaluation(cdata)
     return cdata
 

@@ -11,7 +11,7 @@ from ftactic import get_tactic_matrix
 from observables import TACTICS
 from util import aggregate_matrix, safe_divide, formalize_file, print_matrix, print_sparse_matrix, filter_events
 from stats import process_event_counts, generate_event_counter
-from events_process import process_sysmon, process_winlogs, process_suricata, generate_network_pairs
+from events_process import process_sysmon, process_winevent, process_suricata, generate_network_pairs
 
 np.set_printoptions(precision=2, suppress=True)
 
@@ -30,21 +30,21 @@ parser.add_argument('-s',
                     default=False,
                     help='Use the sysmon data and features.')
 parser.add_argument('-w',
-                    '--winlog',
+                    '--winevent',
                     action='store_true',
                     default=False,
-                    help='Use the winlog data and features.')
+                    help='Use the windows event channel data and features.')
 
 args = parser.parse_args()
 
 USE_SYSMON = args.sysmon
-USE_WINLOG = args.winlog
+USE_WINEVENT = args.winevent
 USE_SURICATA = args.suricata
 
 message_builder = 'Initializing a full stats run with '
 message_data = {
     'sysmon': USE_SYSMON,
-    'winlog': USE_WINLOG,
+    'winevent': USE_WINEVENT,
     'suricata': USE_SURICATA
 }
 
@@ -75,7 +75,7 @@ suricata_events = list()
 
 if USE_SYSMON:
     process_create_events = filter_events('Microsoft-Windows-Sysmon')
-if USE_WINLOG:
+if USE_WINEVENT:
     security_events = filter_events('Microsoft-Windows-Security')
 if USE_SURICATA:
     suricata_events = filter_events('Suricata')
@@ -83,7 +83,7 @@ if USE_SURICATA:
 print('Loading complete')
 
 sysmon_counter = process_event_counts
-winlog_counter = generate_event_counter('eventID')
+winevent_counter = generate_event_counter('eventID')
 suricata_counter = generate_event_counter('dest_port')
 
 # Sysmon
@@ -92,11 +92,11 @@ if USE_SYSMON:
     for hostname in HOSTNAMES:
         sdata[hostname] = process_sysmon(hostname, process_create_events, sysmon_counter)
 
-# Winlogs
+# Windows Event Channel
 cdata = dict()
-if USE_WINLOG:
+if USE_WINEVENT:
     for hostname in HOSTNAMES:
-        cdata[hostname] = process_winlogs(hostname, security_events, winlog_counter)
+        cdata[hostname] = process_winevent(hostname, security_events, winevent_counter)
 
 host_indices = {}
 hostname_indices = {}
@@ -132,7 +132,7 @@ for tactic in TACTICS.keys():
         if USE_SYSMON:
             total += sdata[hostname]['total_logs']
             anomalous += sdata[hostname]['tactics'][tactic]['count']
-        if USE_WINLOG:
+        if USE_WINEVENT:
             total += cdata[hostname]['total_logs']
             anomalous += cdata[hostname]['tactics'][tactic]['count']
 
