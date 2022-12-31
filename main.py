@@ -73,12 +73,15 @@ print(message_banner)
 
 print("Loading {} file...".format(DATA_FILE))
 
+# Make sure Python json library can properly process the json input file from definitions.py file.
+# Change aspects of file if necessary
 formalize_file(DATA_FILE)
 
 process_create_events = list()
 security_events = list()
 suricata_events = list()
 
+# Filter the data.txt file for specific events based on a provided keyword
 if USE_SYSMON:
     process_create_events = filter_events('Microsoft-Windows-Sysmon')
 if USE_WINEVENT:
@@ -88,22 +91,24 @@ if USE_SURICATA:
 
 print('Loading complete')
 
+# Create counter functions that can properly count the number of anomalous logs. See stats.py file
 sysmon_counter = process_event_counts
 winevent_counter = generate_event_counter('eventID')
 suricata_counter = generate_event_counter('dest_port')
 
-# Sysmon
+# Process Sysmon
 sdata = dict()
 if USE_SYSMON:
     for hostname in HOSTNAMES:
         sdata[hostname] = process_sysmon(hostname, process_create_events, sysmon_counter, OUTPUT_LOGDATA)
 
-# Windows Event Channel
+# Process Windows Event Channel
 cdata = dict()
 if USE_WINEVENT:
     for hostname in HOSTNAMES:
         cdata[hostname] = process_winevent(hostname, security_events, winevent_counter, OUTPUT_LOGDATA)
 
+# Establish lists to keep count of logs on and between hosts
 host_indices = {}
 hostname_indices = {}
 host_index = len(HOSTNAMES)
@@ -118,7 +123,7 @@ src_log_counts = np.zeros(host_index)
 dst_log_counts = np.zeros(host_index)
 total_log_count = 0
 
-# Suricata
+# Process Suricata
 ndata = dict()
 suricata_pairs = generate_network_pairs(suricata_events, USE_SURICATA)
 if USE_SURICATA:
@@ -126,8 +131,11 @@ if USE_SURICATA:
         src, dst = keys
         ndata[src, dst] = process_suricata(src, dst, logs, suricata_counter, OUTPUT_LOGDATA)
 
+# Get the frequency matrices for each tactic. See ftactic.py
 f_tactic_matrix = get_tactic_matrix('data/tactic_matrix.npy', hostname_indices)
 
+# Generate the cumulative probability distribution matrix
+# based on the processed logs/frequency stats for each tactic for each host from above.
 p_cpd = {}
 for tactic in TACTICS.keys():
     matrix = np.reshape(np.zeros(host_index * host_index), (host_index, host_index))
@@ -160,6 +168,7 @@ if USE_SURICATA:
         dst_log_counts[j] += ndata[src, dst]['total_logs']
         total_log_count += ndata[src, dst]['total_logs']
 
+# Generate the Observability Matrix
 e_obsrv = {}
 for index, (tactic, p_matrix) in enumerate(p_cpd.items()):
     e_obsrv[tactic] = p_matrix * f_tactic_matrix[tactic]

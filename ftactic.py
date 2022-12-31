@@ -86,7 +86,7 @@ def build_matrix_from_walks(walks: List[Dict[str, object]], host_indices: Dict[s
             host = step['host']
             tactic = step['tactic']
             host_i = host_indices[host]
-            if tactic == 'discovery' or tactic == 'privilege_escalation' or tactic == 'execution':
+            if tactic == 'privilege_escalation' or tactic == 'execution':
                 m[tactic][host_i, host_i] += 1.0
             elif tactic == 'lateral_movement':
                 assert (index > 0)
@@ -94,7 +94,16 @@ def build_matrix_from_walks(walks: List[Dict[str, object]], host_indices: Dict[s
                 source_i = host_indices[previous['host']]
                 m[tactic][source_i, host_i] += 1.0
                 m[tactic][source_i, source_i] += 1.0
-    
+            elif tactic == 'discovery':
+                if index >= (len(walks) - 1):
+                    m[tactic][host_i, host_i] += 1.0
+                elif walk[index + 1]['tactic'] == 'lateral_movement':
+                    next_w = walk[index + 1]
+                    dest_i = host_indices[next_w['host']]
+                    m[tactic][host_i, dest_i] += 1.0
+                    m[tactic][host_i, host_i] += 1.0
+                else:
+                    m[tactic][host_i, host_i] += 1.0
     return m
 
 
