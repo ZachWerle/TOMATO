@@ -9,7 +9,7 @@ import numpy as np
 from definitions import HOST_IPS, HOST_TO_IP, HOSTNAMES, DATA_FILE
 from ftactic import get_tactic_matrix
 from observables import TACTICS
-from util import aggregate_matrix, safe_divide, formalize_file, print_matrix, print_sparse_matrix, filter_events
+from util import aggregate_matrix, safe_divide, print_matrix, print_sparse_matrix, filter_events
 from stats import process_event_counts, generate_event_counter
 from events_process import process_sysmon, process_winevent, process_suricata, generate_network_pairs
 
@@ -73,21 +73,17 @@ print(message_banner)
 
 print("Loading {} file...".format(DATA_FILE))
 
-# Make sure Python json library can properly process the json input file from definitions.py file.
-# Change aspects of file if necessary
-formalize_file(DATA_FILE)
-
 process_create_events = list()
 security_events = list()
 suricata_events = list()
 
 # Filter the data.txt file for specific events based on a provided keyword
 if USE_SYSMON:
-    process_create_events = filter_events('Microsoft-Windows-Sysmon')
+    process_create_events = filter_events(DATA_FILE, 'Microsoft-Windows-Sysmon')
 if USE_WINEVENT:
-    security_events = filter_events('Microsoft-Windows-Security')
+    security_events = filter_events(DATA_FILE, 'Microsoft-Windows-Security')
 if USE_SURICATA:
-    suricata_events = filter_events('Suricata')
+    suricata_events = filter_events(DATA_FILE, 'Suricata')
 
 print('Loading complete')
 

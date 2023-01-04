@@ -2,13 +2,14 @@
 This file is for functions related to processing the different kinds of events in data.txt
 The code in this file is adapted from https://github.com/TorNATO-PRO/TOMATO by Nathan Waltz
 """
-from observables import NETWORK_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, WINEVENT_ATTACK_FEATURES
+from observables import NETWORK_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, WINEVENT_SECURITY_ATTACK_FEATURES
 from definitions import HOST_IPS, WAZUH
 from util import split_filepath, command_param_list
 from stats import evaluate_machine
 from typing import Dict
 
 
+# Function to output the log stats of the host. Number of anomalous and total logs is printed among other stats.
 def print_evaluation(stats, output_logdata) -> None:
     if not output_logdata:
         return None
@@ -27,6 +28,7 @@ def print_evaluation(stats, output_logdata) -> None:
     print('Anomalous Freq: {0} logs / day'.format(stats['anomalous']))
 
 
+# Format the sysmon log into a standard format for easier processing
 def reduce_event(meta_event) -> Dict[str, str]:
     if WAZUH:
         event = meta_event['data']['win']['eventdata']
@@ -62,6 +64,7 @@ def reduce_event(meta_event) -> Dict[str, str]:
     return event_dict
 
 
+# Generate pairs of hosts that appear in each network event and add each payload executed between hosts to the dict.
 def generate_network_pairs(network_events, use_suricata) -> Dict:
     network_pairs = dict()
     if use_suricata and WAZUH:
@@ -102,6 +105,7 @@ def generate_network_pairs(network_events, use_suricata) -> Dict:
     return network_pairs
 
 
+# Calculate the Sysmon stats for the given host
 def process_sysmon(hostname, process_create_events, sysmon_counter, output_logdata) -> Dict:
     if output_logdata:
         message = 'STATISTICS FOR SYSMON LOGS Host: ' + hostname
@@ -120,6 +124,7 @@ def process_sysmon(hostname, process_create_events, sysmon_counter, output_logda
     return sdata
 
 
+# Calculate the Windows Event Channel stats for the given host
 def process_winevent(hostname, security_events, winevent_counter, output_logdata) -> Dict:
     if output_logdata:
         message = 'STATISTICS FOR WINDOWS SECURITY LOGS Host: ' + hostname
@@ -132,12 +137,13 @@ def process_winevent(hostname, security_events, winevent_counter, output_logdata
     else:
         reduced_events = filter(lambda x: x['computer_name'] == hostname, security_events)
     reduced_events = list(reduced_events)
-    cdata = evaluate_machine(reduced_events, WINEVENT_ATTACK_FEATURES, winevent_counter)
+    cdata = evaluate_machine(reduced_events, WINEVENT_SECURITY_ATTACK_FEATURES, winevent_counter)
     if output_logdata:
         print_evaluation(cdata, output_logdata)
     return cdata
 
 
+# Calculate the Suricata stats for the given host
 def process_suricata(src, dst, logs, suricata_counter, output_logdata) -> Dict:
     if output_logdata:
         message = f'SURICATA STATISTICS FOR SRC: {src}, DST: {dst}'
@@ -151,6 +157,7 @@ def process_suricata(src, dst, logs, suricata_counter, output_logdata) -> Dict:
     return ndata
 
 
+# Calculate the Netflow stats for the given host
 def process_netflow(src, dst, logs, netflow_counter, output_logdata) -> Dict:
     if output_logdata:
         message = f'NETFLOW STATISTICS FOR SRC: {src}, DST: {dst}'

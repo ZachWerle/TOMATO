@@ -1,6 +1,5 @@
 """The code in this file is adapted from https://github.com/TorNATO-PRO/TOMATO by Nathan Waltz"""
 import numpy as np
-import json
 from typing import Dict
 
 
@@ -27,18 +26,6 @@ def aggregate_matrix(matrix):
     return src_observ, dst_observ
 
 
-def formalize_file(file_path):
-    infile = open(file_path, "r", encoding="utf8")
-    outfile = open("data/data.txt", "w", encoding="utf8")
-    for line in infile.readlines():
-        new_line = line.replace(":true", ":True")
-        new_line = new_line.replace(":false", ":False")
-        new_line = new_line.replace("timestamp", "@timestamp")
-        outfile.write(new_line)
-    infile.close()
-    outfile.close()
-
-
 def print_matrix(matrix_table: Dict[str, np.ndarray]) -> None:
     if isinstance(matrix_table, dict):
         for attack_tactic, attack_matrix in matrix_table.items():
@@ -63,12 +50,14 @@ def print_sparse_matrix(matrix_table: Dict[str, np.ndarray]) -> None:
         print()
 
 
-def filter_events(keyword) -> list:
+def filter_events(file_path, keyword) -> list:
     events = list()
-    with open("data/data.txt", encoding="utf8") as file:
-        lines = map(lambda line: eval(line.strip()), file.readlines())
-        all_events = list(map(lambda line: json.loads(json.dumps(line)), lines))
-        for event in all_events:
+    with open(file_path, encoding="utf8") as file:
+        for line in file.readlines():
+            new_line = line.replace(":true", ":True")
+            new_line = new_line.replace(":false", ":False")
+            new_line = new_line.replace("timestamp", "@timestamp")
+            event = eval(new_line.strip())
             if 'full_log' in event and keyword.casefold() in event['full_log'].casefold():
                 events += [event]
             elif 'location' in event and keyword.casefold() in event['location'].casefold():

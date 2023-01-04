@@ -5,6 +5,9 @@ This program is used to analyze the observability of sensors/data collection too
 This version of TOMATO is specifically adapted for Wazuh alerts/logs.
 The code in this project is adapted from https://github.com/TorNATO-PRO/TOMATO by Nathan Waltz which is a continuation of the research at https://ieeexplore.ieee.org/abstract/document/8788508.
 
+INSTRUCTIONS:
+Please see definitions.py for the input of your file and the creation of an adjacency graph for 
+your network. Then while in the directory of the TOMATO project, type python main.py -h into the console.
 
 Python Version: 3.11.1
 

@@ -1,7 +1,7 @@
 import observables
 import datetime
 
-from typing import List, Dict, Set
+from typing import List, Dict
 from definitions import WAZUH
 
 from util import safe_divide

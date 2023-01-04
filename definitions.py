@@ -2,9 +2,7 @@
 Global Constants that will be used throughout the project.
 The code in this file is adapted from https://github.com/TorNATO-PRO/TOMATO by Nathan Waltz
 """
-from itertools import product
 from typing import KeysView
-
 from networkx import Graph
 
 SECURITY_LOG = 'Microsoft-Windows-Security-Auditing'
@@ -30,6 +28,9 @@ HOSTNAMES = HOST_TO_IP.keys()
 HOST_IPS = HOST_TO_IP.values()
 
 
+# This function is used to generate the adjacency graph needed to produce the appropriate ftactic matrix
+# for your network.
+# Please read the instructions below and build your graph.
 def generate_graphical_system(hostnames: KeysView[str]) -> Graph:
     """
     Generates a gsystem for the hostnames.
@@ -45,7 +46,7 @@ def generate_graphical_system(hostnames: KeysView[str]) -> Graph:
         if host != SERVER:
             adjacency_graph.add_edge(host, SERVER)
 
-    # Manually attach edges for individual services
+    # Manually attach edges for individual services.
     adjacency_graph.add_edge("DESKTOP-D403BQC", "DESKTOP-CKP652S")
     adjacency_graph.add_edge("DESKTOP-0H8GJPO", "DESKTOP-9LO9B7Q")
     adjacency_graph.add_edge("DESKTOP-CKP652S", "DESKTOP-0H8GJPO")

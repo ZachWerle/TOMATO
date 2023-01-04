@@ -104,7 +104,7 @@ PROCESS_ATTACK_FEATURES = {
     ]
 }
 
-WINEVENT_ATTACK_FEATURES = {
+WINEVENT_SECURITY_ATTACK_FEATURES = {
     'dcom': [528, 552, 4648],
     'logon_scripts': [528, 552],
     'pass_the_hash': [4624],
@@ -143,31 +143,21 @@ NETWORK_ATTACK_FEATURES = {
 }
 
 TACTICS = {
-    'lateral_movement': set([
-        'application_deployment_software', 'dcom', 'logon_scripts', 'pass_the_hash',
-        'pass_the_ticket', 'remote_desktop_protocol', 'remote_file_copy',
-        'ssh_hijacking', 'shared_webroot', 'taint_shared_content',
-        'third_party_software', 'windows_admin_shares', 'windows_remote_management'
-    ]),
-    'discovery': set([
-        'account_discovery', 'network_service_scanning', 'network_share_discovery',
-        'password_policy_discovery', 'permission_groups_discovery',
-        'process_discovery', 'query_registry', 'remote_system_discovery',
-        'security_software_discovery', 'system_information_discovery',
-        'system_network_config_discovery', 'system_network_conn_discovery',
-        'system_owner_discovery', 'system_service_discovery', 'system_time_discovery'
-    ]),
-    'execution': set([
-        'cmstp', 'command_line_interface', 'control_panel_items',
-        'dynamic_data_exchange', 'installutil', 'mshta', 'powershell', 'regsvc_regasm',
-        'regsvr32', 'rundll32', 'scheduled_task', 'scripting', 'service_execution',
-        'signed_binary_proxy_exec', 'trusted_deverloper_utilities', 'user_execution',
-        'windows_mgmt_instrumentation'
-    ]),
-    'privilege_escalation': set([
-        'access_token_manipulation', 'accessibility_features', 'appcert_dlls',
-        'appinit_dlls', 'application_shimming', 'bypass_uac',
-        'image_file_execution_options_injection', 'port_monitors',
-        'sid_history_injection', 'service_registry_perms_weakness', 'valid_accounts'
-    ])
+    'lateral_movement': {'application_deployment_software', 'dcom', 'logon_scripts', 'pass_the_hash', 'pass_the_ticket',
+                         'remote_desktop_protocol', 'remote_file_copy', 'ssh_hijacking', 'shared_webroot',
+                         'taint_shared_content', 'third_party_software', 'windows_admin_shares',
+                         'windows_remote_management'},
+    'discovery': {'account_discovery', 'network_service_scanning', 'network_share_discovery',
+                  'password_policy_discovery', 'permission_groups_discovery', 'process_discovery', 'query_registry',
+                  'remote_system_discovery', 'security_software_discovery', 'system_information_discovery',
+                  'system_network_config_discovery', 'system_network_conn_discovery', 'system_owner_discovery',
+                  'system_service_discovery', 'system_time_discovery'},
+    'execution': {'cmstp', 'command_line_interface', 'control_panel_items', 'dynamic_data_exchange', 'installutil',
+                  'mshta', 'powershell', 'regsvc_regasm', 'regsvr32', 'rundll32', 'scheduled_task', 'scripting',
+                  'service_execution', 'signed_binary_proxy_exec', 'trusted_deverloper_utilities', 'user_execution',
+                  'windows_mgmt_instrumentation'},
+    'privilege_escalation': {'access_token_manipulation', 'accessibility_features', 'appcert_dlls', 'appinit_dlls',
+                             'application_shimming', 'bypass_uac', 'image_file_execution_options_injection',
+                             'port_monitors', 'sid_history_injection', 'service_registry_perms_weakness',
+                             'valid_accounts'}
 }

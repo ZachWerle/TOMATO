@@ -8,9 +8,9 @@ from os.path import exists
 from definitions import GRAPHICAL_SYSTEM
 
 
-def markov_analysis(state: str) -> List[str]:
-    tactics = set(['discovery', 'privilege_escalation', 'lateral_movement', 'execution'])
-    tactics = tactics.difference(set([state]))
+def markov_analysis(state: str) -> str:
+    tactics = {'discovery', 'privilege_escalation', 'lateral_movement', 'execution'}
+    tactics = tactics.difference({state})
     sample_t = sample(list(tactics), 1)[0]
     return sample_t
 
