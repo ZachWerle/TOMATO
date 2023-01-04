@@ -8,7 +8,7 @@ from networkx import Graph
 SECURITY_LOG = 'Microsoft-Windows-Security-Auditing'
 
 # This is where you input the file path to the data file you want to load into TOMATO
-DATA_FILE = "data/alerts-final.json"
+DATA_FILE = "data/archives-test.json"
 # This is where you check if the file is a Wazuh file
 WAZUH = 1
 

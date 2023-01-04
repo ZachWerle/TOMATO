@@ -7,7 +7,8 @@ The code in this project is adapted from https://github.com/TorNATO-PRO/TOMATO b
 
 INSTRUCTIONS:
 Please see definitions.py for the input of your file and the creation of an adjacency graph for 
-your network. Then while in the directory of the TOMATO project, type python main.py -h into the console.
+your network. Then while in the directory of the TOMATO project, type python main.py -h into your 
+command prompt/terminal.
 
 Python Version: 3.11.1
 

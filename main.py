@@ -77,7 +77,7 @@ process_create_events = list()
 security_events = list()
 suricata_events = list()
 
-# Filter the data.txt file for specific events based on a provided keyword
+# Filter the DATA_FILE file for specific events based on a provided keyword
 if USE_SYSMON:
     process_create_events = filter_events(DATA_FILE, 'Microsoft-Windows-Sysmon')
 if USE_WINEVENT:
