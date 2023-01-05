@@ -6,11 +6,18 @@ from observables import NETWORK_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, WINEVE
 from definitions import HOST_IPS, WAZUH
 from util import split_filepath, command_param_list
 from stats import evaluate_machine
-from typing import Dict
+from typing import Dict, List
+import datetime
 
 
 # Function to output the log stats of the host. Number of anomalous and total logs is printed among other stats.
-def print_evaluation(stats, output_logdata) -> None:
+def print_evaluation(stats: Dict[str, Dict | int | float | str | datetime], output_logdata: int) -> None:
+    """
+        :param stats: a dictionary of the number of anamalous logs, total logs, start/end times, time difference,
+         associated probability of features appearing given events, and frequencies.
+        :param output_logdata: if 1, output the log stats, else return
+        :return: none
+    """
     if not output_logdata:
         return None
     for key, value in stats['tactics'].items():
@@ -29,7 +36,12 @@ def print_evaluation(stats, output_logdata) -> None:
 
 
 # Format the sysmon log into a standard format for easier processing
-def reduce_event(meta_event) -> Dict[str, str]:
+def reduce_event(meta_event: Dict[str, any]) -> Dict[str, str | List]:
+    """
+        :param meta_event: a sysmon event/log
+        :return: a dictionary of the executable executed, parent exe, file path, parent file path, command line params,
+        and timestamp
+    """
     if WAZUH:
         event = meta_event['data']['win']['eventdata']
         path, file = "N/A", "N/A"
@@ -65,7 +77,14 @@ def reduce_event(meta_event) -> Dict[str, str]:
 
 
 # Generate pairs of hosts that appear in each network event and add each payload executed between hosts to the dict.
-def generate_network_pairs(network_events, use_suricata) -> Dict:
+def generate_network_pairs(network_events: List[Dict[str, any]], use_suricata: int) -> \
+        Dict[tuple[str, str], List[Dict[str, str]]]:
+    """
+    :param network_events: list of sysmon events
+    :param use_suricata: if 1, treat the events as being suricata events/logs
+    :return: a dictionary of tuple of source IP and destination IP, and sub dictionary of the payload which includes
+    destination port and timestamp
+    """
     network_pairs = dict()
     if use_suricata and WAZUH:
         for event in network_events:
@@ -106,7 +125,16 @@ def generate_network_pairs(network_events, use_suricata) -> Dict:
 
 
 # Calculate the Sysmon stats for the given host
-def process_sysmon(hostname, process_create_events, sysmon_counter, output_logdata) -> Dict:
+def process_sysmon(hostname: str, process_create_events: List[Dict[str, any]], sysmon_counter,
+                   output_logdata: int) -> Dict[str, Dict | int | float | str | datetime]:
+    """
+    :param sysmon_counter: must be a function for counting sysmon logs
+    :param hostname: name of host; str
+    :param process_create_events: list of sysmon events
+    :param output_logdata: if 1, output the log stats
+    :return: a dictionary of the number of anomalous logs, total logs, start/end times, time difference,
+    associated probability of features appearing given events, and frequencies for the given host
+    """
     if output_logdata:
         message = 'STATISTICS FOR SYSMON LOGS Host: ' + hostname
         banner = '0' * len(message)
@@ -125,7 +153,16 @@ def process_sysmon(hostname, process_create_events, sysmon_counter, output_logda
 
 
 # Calculate the Windows Event Channel stats for the given host
-def process_winevent(hostname, security_events, winevent_counter, output_logdata) -> Dict:
+def process_winevent(hostname: str, security_events: List[Dict[str, any]], winevent_counter,
+                     output_logdata: int) -> Dict[str, Dict | int | float | str | datetime]:
+    """
+        :param winevent_counter: must be a function for counting windows event channel logs
+        :param hostname: name of host; str
+        :param security_events: list of windows security event channel events
+        :param output_logdata: if 1, output the log stats
+        :return: a dictionary of the number of anomalous logs, total logs, start/end times, time difference,
+        associated probability of features appearing given events, and frequencies for the given host
+    """
     if output_logdata:
         message = 'STATISTICS FOR WINDOWS SECURITY LOGS Host: ' + hostname
         banner = '0' * len(message)
@@ -144,7 +181,17 @@ def process_winevent(hostname, security_events, winevent_counter, output_logdata
 
 
 # Calculate the Suricata stats for the given host
-def process_suricata(src, dst, logs, suricata_counter, output_logdata) -> Dict:
+def process_suricata(src: str, dst: str, logs: List[Dict[str, str | str]], suricata_counter, output_logdata: int) -> \
+        Dict[str, Dict | int | float | str | datetime]:
+    """
+        :param suricata_counter: must be a function for counting suricata logs
+        :param src: name of source of packet/event; str
+        :param dst: name of destination of packet/event; str
+        :param output_logdata: if 1, output the log stats
+        :param logs: list of payloads executed between hosts. See generate_network_pairs()
+        :return: a dictionary of the number of anomalous logs, total logs, start/end times, time difference,
+        associated probability of features appearing given events, and frequencies for the given host
+    """
     if output_logdata:
         message = f'SURICATA STATISTICS FOR SRC: {src}, DST: {dst}'
         banner = '0' * len(message)
@@ -158,7 +205,17 @@ def process_suricata(src, dst, logs, suricata_counter, output_logdata) -> Dict:
 
 
 # Calculate the Netflow stats for the given host
-def process_netflow(src, dst, logs, netflow_counter, output_logdata) -> Dict:
+def process_netflow(src: str, dst: str, logs: List[Dict[str, str | str]], netflow_counter, output_logdata: int) \
+        -> Dict[str, Dict | int | float | str | datetime]:
+    """
+        :param netflow_counter: must be a function for counting netflow logs
+        :param src: name of source of packet/event; str
+        :param dst: name of destination of packet/event; str
+        :param output_logdata: if 1, output the log stats
+        :param logs: payloads executed between hosts. See generate_network_pairs()
+        :return: a dictionary of the number of anomalous logs, total logs, start/end times, time difference,
+        associated probability of features appearing given events, and frequencies for the given host
+    """
     if output_logdata:
         message = f'NETFLOW STATISTICS FOR SRC: {src}, DST: {dst}'
         banner = '0' * len(message)

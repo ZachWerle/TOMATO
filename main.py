@@ -158,8 +158,9 @@ if USE_SURICATA:
         src, dst = keys
         i = host_indices[src]
         j = host_indices[dst]
-        tactic = 'lateral_movement'
-        p_cpd[tactic][i][j] = 1 - ndata[src, dst]['tactics'][tactic]['frequency']
+        tactics = {'lateral_movement', 'discovery'}
+        for tactic in tactics:
+            p_cpd[tactic][i][j] = 1 - ndata[src, dst]['tactics'][tactic]['frequency']
         src_log_counts[i] += ndata[src, dst]['total_logs']
         dst_log_counts[j] += ndata[src, dst]['total_logs']
         total_log_count += ndata[src, dst]['total_logs']
@@ -167,7 +168,13 @@ if USE_SURICATA:
 # Generate the Observability Matrix
 e_obsrv = {}
 for index, (tactic, p_matrix) in enumerate(p_cpd.items()):
-    e_obsrv[tactic] = p_matrix * f_tactic_matrix[tactic]
+    shape = f_tactic_matrix[tactic].shape
+    matrix = np.zeros(shape)
+    for i in range(shape[0]):
+        for j in range(shape[1]):
+            matrix[i][j] = p_matrix[i][j] * f_tactic_matrix[tactic][i][j]
+    e_obsrv[tactic] = matrix
+
 
 message = 'P_cpd Matrix'
 banner = '0' * len(message)

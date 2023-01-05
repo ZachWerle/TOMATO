@@ -1,6 +1,6 @@
 """The code in this file is adapted from https://github.com/TorNATO-PRO/TOMATO by Nathan Waltz"""
 import numpy as np
-from typing import Dict
+from typing import Dict, List
 
 
 def split_filepath(path):
@@ -50,7 +50,15 @@ def print_sparse_matrix(matrix_table: Dict[str, np.ndarray]) -> None:
         print()
 
 
-def filter_events(file_path, keyword) -> list:
+# Filter the logs from the file at file_path using a provided keyword that should appear somewhere in the log/event.
+# Return a list of these logs/events.
+def filter_events(file_path: str, keyword: str) -> List[Dict[str, any]]:
+    """
+    :param file_path: a string of the file path to your input file/dataset
+    :param keyword: a string that identifies the type of event that you want. A signature of the event that appears
+    somewhere in it
+    :return: a list of filtered logs/events from the file
+    """
     events = list()
     with open(file_path, encoding="utf8") as file:
         for line in file.readlines():
