@@ -25,7 +25,7 @@ PROCESS_ATTACK_FEATURES = {
     ],
     'process_discovery': [{'exe': 'tasklist.exe'}],
     'query_registry': [{'exe': 'reg.exe', 'params': ['query']}],
-    'remote_system_discovery': [{'exe': 'net.exe', 'params': ['view']}],
+    'remote_system_discovery': [{'exe': 'net.exe', 'params': ['view']}, {'exe': 'PING.EXE'}],
     'security_software_discovery': [
         {'exe': 'netsh.exe'},
         {'exe': 'reg.exe', 'params': ['query']}

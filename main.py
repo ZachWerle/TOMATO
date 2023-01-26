@@ -142,6 +142,13 @@ for tactic in TACTICS.keys():
         if USE_SYSMON:
             total += sdata[hostname]['total_logs']
             anomalous += sdata[hostname]['tactics'][tactic]['count']
+            if tactic == 'discovery':
+                for keys, count in sdata[hostname]['discovery_host_pairs'].items():
+                    src, dst = keys
+                    src = host_indices[src]
+                    dst = host_indices[dst]
+                    matrix[src][dst] = safe_divide(total - count, total)
+                    dst_log_counts[dst] += count
         if USE_WINEVENT:
             total += cdata[hostname]['total_logs']
             anomalous += cdata[hostname]['tactics'][tactic]['count']
@@ -158,9 +165,8 @@ if USE_SURICATA:
         src, dst = keys
         i = host_indices[src]
         j = host_indices[dst]
-        tactics = {'lateral_movement', 'discovery'}
-        for tactic in tactics:
-            p_cpd[tactic][i][j] = 1 - ndata[src, dst]['tactics'][tactic]['frequency']
+        tactic = 'lateral_movement'
+        p_cpd[tactic][i][j] = 1 - ndata[src, dst]['tactics'][tactic]['frequency']
         src_log_counts[i] += ndata[src, dst]['total_logs']
         dst_log_counts[j] += ndata[src, dst]['total_logs']
         total_log_count += ndata[src, dst]['total_logs']

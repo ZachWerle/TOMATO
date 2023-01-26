@@ -3,7 +3,7 @@ This file is for functions related to processing the different kinds of events i
 The code in this file is adapted from https://github.com/TorNATO-PRO/TOMATO by Nathan Waltz
 """
 from observables import NETWORK_ATTACK_FEATURES, PROCESS_ATTACK_FEATURES, WINEVENT_SECURITY_ATTACK_FEATURES
-from definitions import HOST_IPS, WAZUH
+from definitions import HOST_IPS, WAZUH, HOST_TO_IP
 from util import split_filepath, command_param_list
 from stats import evaluate_machine
 from typing import Dict, List
@@ -147,8 +147,24 @@ def process_sysmon(hostname: str, process_create_events: List[Dict[str, any]], s
         reduced_events = filter(lambda x: x['computer_name'] == hostname, process_create_events)
     reduced_events = [reduce_event(event) for event in reduced_events]
     sdata = evaluate_machine(reduced_events, PROCESS_ATTACK_FEATURES, sysmon_counter)
+    discovery_host_pairs = {}
+    for event in reduced_events:
+        if event['exe'] == 'PING.EXE' or (event['exe'] == 'net.exe' and 'view' in event['params']):
+            dest_ip = ""
+            for param in event['params']:
+                if param and ('0' <= param[0] <= '9'):
+                    dest_ip = param
+                    pair = (HOST_TO_IP[hostname], dest_ip)
+                    if pair in discovery_host_pairs:
+                        discovery_host_pairs[pair] += 1
+                    else:
+                        discovery_host_pairs[pair] = 0
+    sdata['discovery_host_pairs'] = discovery_host_pairs
     if output_logdata:
         print_evaluation(sdata, output_logdata)
+        print("Discovery Host Pairs:")
+        for keys, count in sdata['discovery_host_pairs'].items():
+            print("Host Pair {} anomalous logs = {}".format(keys, count))
     return sdata
 
 
