@@ -1,6 +1,8 @@
 """The code in this file is adapted from https://github.com/TorNATO-PRO/TOMATO by Nathan Waltz"""
 import numpy as np
 from typing import Dict, List
+from definitions import HOST_TO_IP
+from observables import TACTICS
 
 
 def split_filepath(path):
@@ -20,8 +22,14 @@ def safe_divide(a: float, b: float):
 
 
 def aggregate_matrix(matrix):
-    src_observ = np.sum(matrix['execution'], axis=0)
-    dst_observ = np.sum(matrix['execution'], axis=1)
+    src_observ = [0] * len(HOST_TO_IP)
+    dst_observ = [0] * len(HOST_TO_IP)
+    for tactic in TACTICS:
+        src_sum = np.sum(matrix[tactic], axis=1)
+        dst_sum = np.sum(matrix[tactic], axis=0)
+        for host_indx in range(len(HOST_TO_IP)):
+            src_observ[host_indx] += src_sum[host_indx]
+            dst_observ[host_indx] += dst_sum[host_indx]
 
     return src_observ, dst_observ
 

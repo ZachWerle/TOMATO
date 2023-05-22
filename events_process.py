@@ -149,22 +149,24 @@ def process_sysmon(hostname: str, process_create_events: List[Dict[str, any]], s
     sdata = evaluate_machine(reduced_events, PROCESS_ATTACK_FEATURES, sysmon_counter)
     discovery_host_pairs = {}
     for event in reduced_events:
-        if event['exe'] == 'PING.EXE' or (event['exe'] == 'net.exe' and 'view' in event['params']):
-            dest_ip = ""
-            for param in event['params']:
-                if param and ('0' <= param[0] <= '9'):
-                    dest_ip = param
-                    pair = (HOST_TO_IP[hostname], dest_ip)
-                    if pair in discovery_host_pairs:
-                        discovery_host_pairs[pair] += 1
-                    else:
-                        discovery_host_pairs[pair] = 0
+        dest_ip = ""
+        for param in event['params']:
+            if param and param in HOST_IPS:
+                dest_ip = param
+                pair = (HOST_TO_IP[hostname], dest_ip)
+                if pair in discovery_host_pairs:
+                    # The if statement below checks for evidence of anomalous events between hosts
+                    if event['exe'] == 'PING.EXE' or (event['exe'] == 'net.exe' and 'view' in event['params']):
+                        discovery_host_pairs[pair]['anomalous'] += 1
+                    discovery_host_pairs[pair]['total'] += 1
+                else:
+                    discovery_host_pairs[pair] = {'total': 0, 'anomalous': 0}
     sdata['discovery_host_pairs'] = discovery_host_pairs
     if output_logdata:
         print_evaluation(sdata, output_logdata)
         print("Discovery Host Pairs:")
-        for keys, count in sdata['discovery_host_pairs'].items():
-            print("Host Pair {} anomalous logs = {}".format(keys, count))
+        for keys, counts in sdata['discovery_host_pairs'].items():
+            print("Host Pair: {} Logs: {}".format(keys, counts))
     return sdata
 
 

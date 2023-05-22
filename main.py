@@ -143,12 +143,14 @@ for tactic in TACTICS.keys():
             total += sdata[hostname]['total_logs']
             anomalous += sdata[hostname]['tactics'][tactic]['count']
             if tactic == 'discovery':
-                for keys, count in sdata[hostname]['discovery_host_pairs'].items():
+                for keys, counts in sdata[hostname]['discovery_host_pairs'].items():
                     src, dst = keys
+                    t = counts['total']
+                    a = counts['anomalous']
                     src = host_indices[src]
                     dst = host_indices[dst]
-                    matrix[src][dst] = safe_divide(total - count, total)
-                    dst_log_counts[dst] += count
+                    matrix[src][dst] = safe_divide(t - a, t)
+                    dst_log_counts[dst] += a
         if USE_WINEVENT:
             total += cdata[hostname]['total_logs']
             anomalous += cdata[hostname]['tactics'][tactic]['count']
