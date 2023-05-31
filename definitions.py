@@ -8,15 +8,15 @@ from networkx import Graph
 SECURITY_LOG = 'Microsoft-Windows-Security-Auditing'
 
 # This is where you input the file path to the data file you want to load into TOMATO
-DATA_FILE = "data/archives-test.json"
+DATA_FILE = "data/archives.json"
 # This is where you check if the file is a Wazuh file
 WAZUH = 1
 
 # This is where you input the key/name of the server that hosts your SIEM and associated event dataset
-SERVER = "zachary-VirtualBox"
+SERVER = "*****-VirtualBox"
 
 HOST_TO_IP = {
-    'zachary-VirtualBox': '10.0.2.5',
+    '*****-VirtualBox': '10.0.2.5',
     'DESKTOP-9LO9B7Q': '10.0.2.6',
     'DESKTOP-D403BQC': '10.0.2.7',
     'DESKTOP-0H8GJPO': '10.0.2.8',
