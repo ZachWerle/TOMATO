@@ -158,9 +158,8 @@ def process_sysmon(hostname: str, process_create_events: List[Dict[str, any]], s
                     # The if statement below checks for evidence of anomalous events between hosts
                     if event['exe'] == 'PING.EXE' or (event['exe'] == 'net.exe' and 'view' in event['params']):
                         discovery_host_pairs[pair]['anomalous'] += 1
-                    discovery_host_pairs[pair]['total'] += 1
                 else:
-                    discovery_host_pairs[pair] = {'total': 0, 'anomalous': 0}
+                    discovery_host_pairs[pair] = {'anomalous': 0}
     sdata['discovery_host_pairs'] = discovery_host_pairs
     if output_logdata:
         print_evaluation(sdata, output_logdata)

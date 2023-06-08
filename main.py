@@ -43,7 +43,7 @@ parser.add_argument('-w',
 args = parser.parse_args()
 
 OUTPUT_LOGDATA = args.logging
-USE_SYSMON = args.sysmon
+USE_SYSMON = 1 or args.sysmon
 USE_WINEVENT = args.winevent
 USE_SURICATA = args.suricata
 
@@ -145,11 +145,11 @@ for tactic in TACTICS.keys():
             if tactic == 'discovery':
                 for keys, counts in sdata[hostname]['discovery_host_pairs'].items():
                     src, dst = keys
-                    t = counts['total']
                     a = counts['anomalous']
                     src = host_indices[src]
                     dst = host_indices[dst]
-                    matrix[src][dst] = safe_divide(t - a, t)
+                    # 'total' at this point is just the total number of sysmon events
+                    matrix[src][dst] = safe_divide(total - a, total)
                     dst_log_counts[dst] += a
         if USE_WINEVENT:
             total += cdata[hostname]['total_logs']

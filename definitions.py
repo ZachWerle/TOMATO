@@ -13,10 +13,10 @@ DATA_FILE = "data/archives.json"
 WAZUH = 1
 
 # This is where you input the key/name of the server that hosts your SIEM and associated event dataset
-SERVER = "*****-VirtualBox"
+SERVER = "zachary-VirtualBox"
 
 HOST_TO_IP = {
-    '*****-VirtualBox': '10.0.2.5',
+    'zachary-VirtualBox': '10.0.2.5',
     'DESKTOP-9LO9B7Q': '10.0.2.6',
     'DESKTOP-D403BQC': '10.0.2.7',
     'DESKTOP-0H8GJPO': '10.0.2.8',
