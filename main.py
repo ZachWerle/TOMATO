@@ -220,8 +220,8 @@ print(message)
 print(banner)
 src_observ, dst_observ = aggregate_matrix(e_obsrv)
 
-print(f'Destination Observability: {src_observ}')
-print(f'Source Observability: {dst_observ}')
+print(f'Destination Observability: {dst_observ}')
+print(f'Source Observability: {src_observ}')
 
 message = 'Aggregated Host Efficiency'
 banner = '0' * len(message)
@@ -236,5 +236,5 @@ total_efficiency = safe_divide(reduce(lambda x, y: x + np.sum(y[1], axis=None, d
                                total_log_count)
 
 print(f'Destination Efficiency: {dst_host_efficiency}')
-print(f'Source Host Efficiency: {dst_host_efficiency}')
+print(f'Source Host Efficiency: {src_host_efficiency}')
 print(f'Total Efficiency: {total_efficiency}')
