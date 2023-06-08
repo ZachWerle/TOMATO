@@ -43,7 +43,7 @@ parser.add_argument('-w',
 args = parser.parse_args()
 
 OUTPUT_LOGDATA = args.logging
-USE_SYSMON = 1 or args.sysmon
+USE_SYSMON = args.sysmon
 USE_WINEVENT = args.winevent
 USE_SURICATA = args.suricata
 
