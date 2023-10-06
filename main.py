@@ -13,7 +13,7 @@ from util import aggregate_matrix, safe_divide, print_matrix, print_sparse_matri
 from stats import process_event_counts, generate_event_counter
 from events_process import process_sysmon, process_winevent, process_suricata, generate_network_pairs
 
-np.set_printoptions(precision=2, suppress=True)
+np.set_printoptions(precision=8, suppress=True)
 
 # parse the command line arguments
 # use -h or --help to display more information on the command line
@@ -133,7 +133,7 @@ f_tactic_matrix = get_tactic_matrix('data/tactic_matrix.npy', hostname_indices)
 # Generate the cumulative probability distribution matrix
 # based on the processed logs/frequency stats for each tactic for each host from above.
 p_cpd = {}
-for tactic in TACTICS.keys():
+for tactic in TACTICS:
     matrix = np.reshape(np.zeros(host_index * host_index), (host_index, host_index))
     for hostname in HOSTNAMES:
         i = host_indices[HOST_TO_IP[hostname]]
@@ -145,20 +145,38 @@ for tactic in TACTICS.keys():
             if tactic == 'discovery':
                 for keys, counts in sdata[hostname]['discovery_host_pairs'].items():
                     src, dst = keys
-                    a = counts['anomalous']
+                    a = counts['anom']
                     src = host_indices[src]
                     dst = host_indices[dst]
-                    # 'total' at this point is just the total number of sysmon events
-                    matrix[src][dst] = safe_divide(total - a, total)
+                    stotal = sdata[hostname]['total_logs']
+                    matrix[src][dst] = safe_divide(stotal - a, stotal)
+                    dst_log_counts[dst] += a
+            elif tactic == 'lateral_movement':
+                for keys, counts in sdata[hostname]['lateral_movement_pairs'].items():
+                    src, dst = keys
+                    a = counts['anom']
+                    src = host_indices[src]
+                    dst = host_indices[dst]
+                    stotal = sdata[hostname]['total_logs']
+                    matrix[src][dst] = safe_divide(stotal - a, stotal)
                     dst_log_counts[dst] += a
         if USE_WINEVENT:
             total += cdata[hostname]['total_logs']
             anomalous += cdata[hostname]['tactics'][tactic]['count']
-
-        matrix[i, i] = safe_divide(total - anomalous, total)
-        src_log_counts[i] += total
-        dst_log_counts[i] += total
-        total_log_count += total
+            if tactic == 'lateral_movement':
+                for keys, counts in cdata[hostname]['lateral_movement_pairs'].items():
+                    src, dst = keys
+                    a = counts['anom']
+                    src = host_indices[src]
+                    dst = host_indices[dst]
+                    ctotal = cdata[hostname]['total_logs']
+                    matrix[src][dst] = safe_divide(ctotal - a, ctotal)
+                    dst_log_counts[dst] += a
+        if tactic != 'lateral_movement':
+            matrix[i, i] = safe_divide(total - anomalous, total)
+            src_log_counts[i] += total
+            dst_log_counts[i] += total
+            total_log_count += total
 
     p_cpd[tactic] = matrix
 
@@ -189,7 +207,7 @@ banner = '0' * len(message)
 print(banner)
 print(message)
 print(banner)
-print_sparse_matrix(p_cpd)
+print_matrix(p_cpd)
 
 message = 'F_tactic Matrix'
 banner = '0' * len(message)

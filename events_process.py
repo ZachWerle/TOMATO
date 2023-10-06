@@ -149,22 +149,46 @@ def process_sysmon(hostname: str, process_create_events: List[Dict[str, any]], s
     sdata = evaluate_machine(reduced_events, PROCESS_ATTACK_FEATURES, sysmon_counter)
     discovery_host_pairs = {}
     for event in reduced_events:
-        dest_ip = ""
         for param in event['params']:
-            if param and param in HOST_IPS:
+            if param and param in HOST_IPS and HOST_TO_IP[hostname] != param:
                 dest_ip = param
                 pair = (HOST_TO_IP[hostname], dest_ip)
                 if pair in discovery_host_pairs:
                     # The if statement below checks for evidence of anomalous events between hosts
                     if event['exe'] == 'PING.EXE' or (event['exe'] == 'net.exe' and 'view' in event['params']):
-                        discovery_host_pairs[pair]['anomalous'] += 1
+                        discovery_host_pairs[pair]['anom'] += 1
                 else:
-                    discovery_host_pairs[pair] = {'anomalous': 0}
+                    discovery_host_pairs[pair] = {'anom': 0}
     sdata['discovery_host_pairs'] = discovery_host_pairs
+    lateral_host_pairs = {}
+    for event in reduced_events:
+        pair = ()
+        if event['exe'] in ['tscon.exe', 'cmd.exe', 'ftp.exe', 'net.exe']:
+            for param in event['params']:
+                if param != HOST_TO_IP[hostname] and (param in HOST_IPS or param in HOST_TO_IP.keys()):
+                    if param in HOST_TO_IP.keys():
+                        param = HOST_TO_IP[param]
+                    if event['exe'] == 'cmd.exe':
+                        if '/c' in event['params'] or '/k' in event['params']:
+                            pair = (HOST_TO_IP[hostname], param)
+                    elif event['exe'] == 'net.exe' and 'use' in event['params']:
+                        pair = (HOST_TO_IP[hostname], param)
+                    elif event['exe'] == 'tscon.exe':
+                        pair = (HOST_TO_IP[hostname], param)
+                    elif event['exe'] == 'ftp.exe':
+                        pair = (HOST_TO_IP[hostname], param)
+        if pair != () and pair not in lateral_host_pairs:
+            lateral_host_pairs[pair] = {'anom': 0}
+        if pair != ():
+            lateral_host_pairs[pair]['anom'] += 1
+    sdata['lateral_movement_pairs'] = lateral_host_pairs
     if output_logdata:
         print_evaluation(sdata, output_logdata)
         print("Discovery Host Pairs:")
         for keys, counts in sdata['discovery_host_pairs'].items():
+            print("Host Pair: {} Logs: {}".format(keys, counts))
+        print("Lateral Movement Host Pairs:")
+        for keys, counts in sdata['lateral_movement_pairs'].items():
             print("Host Pair: {} Logs: {}".format(keys, counts))
     return sdata
 
@@ -192,8 +216,25 @@ def process_winevent(hostname: str, security_events: List[Dict[str, any]], winev
         reduced_events = filter(lambda x: x['computer_name'] == hostname, security_events)
     reduced_events = list(reduced_events)
     cdata = evaluate_machine(reduced_events, WINEVENT_SECURITY_ATTACK_FEATURES, winevent_counter)
+    lateral_host_pairs = {}
+    for event in reduced_events:
+        pair = ()
+        if 'eventdata' in event['data']['win']:
+            for param in event['data']['win']['eventdata']:
+                if 'ipadd' in param.lower() and event['data']['win']['eventdata'][param] != '127.0.0.1' and event['data']['win']['eventdata'][param] != HOST_TO_IP[hostname]:
+                    pair = (event['data']['win']['eventdata'][param], HOST_TO_IP[hostname])
+                    break
+        if pair != () and pair not in lateral_host_pairs:
+            lateral_host_pairs[pair] = {'anom': 0}
+        eventid = int(event['data']['win']['system']['eventID'])
+        if pair != () and eventid in [528, 552, 4648, 4624, 1149]:
+            lateral_host_pairs[pair]['anom'] += 1
+    cdata['lateral_movement_pairs'] = lateral_host_pairs
     if output_logdata:
         print_evaluation(cdata, output_logdata)
+        print("Lateral Movement Host Pairs:")
+        for keys, counts in cdata['lateral_movement_pairs'].items():
+            print("Host Pair: {} Logs: {}".format(keys, counts))
     return cdata
 
 

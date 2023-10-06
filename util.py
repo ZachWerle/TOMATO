@@ -38,7 +38,7 @@ def print_matrix(matrix_table: Dict[str, np.ndarray]) -> None:
     if isinstance(matrix_table, dict):
         for attack_tactic, attack_matrix in matrix_table.items():
             print(f'{attack_tactic}:')
-            print(attack_matrix)
+            print(attack_matrix.tolist())
     else:
         print(matrix_table)
 
